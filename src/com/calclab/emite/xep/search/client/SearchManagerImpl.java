@@ -12,7 +12,7 @@ import com.calclab.emite.core.client.packet.Packet;
 import com.calclab.emite.core.client.packet.PacketMatcher;
 import com.calclab.emite.core.client.xmpp.session.ResultListener;
 import com.calclab.emite.core.client.xmpp.session.Session;
-import com.calclab.emite.core.client.xmpp.session.Session.State;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ.Type;
@@ -136,7 +136,7 @@ public class SearchManagerImpl implements SearchManager {
     }
 
     private void requestGenericSearchFields(final Listener<IPacket> onResult) {
-	if (session.getState() == State.ready) {
+	if (session.getSessionState() == XmppSession.SessionState.ready) {
 	    final XmppURI from = session.getCurrentUser();
 	    final IQ iq = new IQ(Type.get, host).From(from).With(XML_LANG, "en");
 	    iq.addQuery(IQ_SEARCH);
@@ -152,7 +152,7 @@ public class SearchManagerImpl implements SearchManager {
     }
 
     private void searchGeneric(final List<IPacket> queryChilds, final Listener<IPacket> onResult) {
-	if (session.getState() == State.ready) {
+	if (session.getSessionState() == XmppSession.SessionState.ready) {
 	    final IQ iq = new IQ(IQ.Type.set, host).From(session.getCurrentUser()).With(XML_LANG, "en");
 	    final IPacket queryPacket = iq.addQuery(IQ_SEARCH);
 	    for (final IPacket child : queryChilds) {

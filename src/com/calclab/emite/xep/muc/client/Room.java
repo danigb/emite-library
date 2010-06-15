@@ -31,6 +31,7 @@ import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
 import com.calclab.emite.core.client.xmpp.datetime.XmppDateTime;
 import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.BasicStanza;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
@@ -94,11 +95,11 @@ public class Room extends AbstractChat implements Chat {
 	session.onStateChanged(new Listener<Session>() {
 	    @Override
 	    public void onEvent(final Session session) {
-		final Session.State state = session.getState();
-		if (Session.State.loggedIn == state) {
-		} else if (Session.State.loggingOut == state) {
+		final XmppSession.SessionState state = session.getSessionState();
+		if (XmppSession.SessionState.loggedIn == state) {
+		} else if (XmppSession.SessionState.loggingOut == state) {
 		    close();
-		} else if (Session.State.disconnected == state || Session.State.error == state) {
+		} else if (XmppSession.SessionState.disconnected == state || XmppSession.SessionState.error == state) {
 		    // TODO : add an error/out state ?
 		    setState(State.locked);
 		}

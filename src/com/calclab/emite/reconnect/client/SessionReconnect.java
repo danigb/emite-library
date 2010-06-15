@@ -1,13 +1,16 @@
 package com.calclab.emite.reconnect.client;
 
-import com.calclab.emite.core.client.conn.Connection;
-import com.calclab.emite.core.client.xmpp.sasl.AuthorizationTransaction;
+import com.calclab.emite.core.client.conn.ConnectionEvent;
+import com.calclab.emite.core.client.conn.ConnectionHandler;
+import com.calclab.emite.core.client.conn.XmppConnection;
+import com.calclab.emite.core.client.conn.ConnectionEvent.EventType;
+import com.calclab.emite.core.client.xmpp.sasl.AuthorizationEvent;
+import com.calclab.emite.core.client.xmpp.sasl.AuthorizationHandler;
 import com.calclab.emite.core.client.xmpp.sasl.SASLManager;
 import com.calclab.emite.core.client.xmpp.session.Credentials;
 import com.calclab.emite.core.client.xmpp.session.Session;
-import com.calclab.emite.core.client.xmpp.session.Session.State;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.suco.client.events.Listener;
-import com.calclab.suco.client.events.Listener2;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 
@@ -16,26 +19,27 @@ public class SessionReconnect {
     private Credentials lastSuccessfulCredentials;
     protected int reconnectionAttempts;
 
-    public SessionReconnect(final Connection connection, final Session session, final SASLManager saslManager) {
+    public SessionReconnect(final XmppConnection connection, final Session session, final SASLManager saslManager) {
 	shouldReconnect = false;
 	reconnectionAttempts = 0;
 	GWT.log("RECONNECT BEHAVIOUR");
 
-	saslManager.onAuthorized(new Listener<AuthorizationTransaction>() {
-
+	saslManager.addAuthorizationHandler(new AuthorizationHandler() {
 	    @Override
-	    public void onEvent(final AuthorizationTransaction authorizationTransaction) {
-		lastSuccessfulCredentials = authorizationTransaction.getCredentials();
+	    public void onAuthorization(final AuthorizationEvent event) {
+		if (event.isSucceed()) {
+		    lastSuccessfulCredentials = event.getCredentials();
+		}
 	    }
 	});
 
 	session.onStateChanged(new Listener<Session>() {
 	    @Override
 	    public void onEvent(final Session session) {
-		final State sessionState = session.getState();
-		if (sessionState == Session.State.connecting) {
+		final XmppSession.SessionState sessionState = session.getSessionState();
+		if (sessionState == XmppSession.SessionState.connecting) {
 		    shouldReconnect = false;
-		} else if (sessionState == Session.State.disconnected && shouldReconnect) {
+		} else if (sessionState == XmppSession.SessionState.disconnected && shouldReconnect) {
 		    if (lastSuccessfulCredentials != null) {
 			final double seconds = Math.pow(2, reconnectionAttempts - 1);
 			new Timer() {
@@ -50,25 +54,23 @@ public class SessionReconnect {
 			}.schedule((int) (1000 * seconds));
 			GWT.log("Reconnecting in " + seconds + " seconds.");
 		    }
-		} else if (sessionState == Session.State.ready) {
+		} else if (sessionState == XmppSession.SessionState.ready) {
 		    GWT.log("CLEAR RECONNECTION ATTEMPS");
 		    reconnectionAttempts = 0;
 		}
 	    }
 	});
 
-	connection.onError(new Listener<String>() {
+	connection.addConnectionHandler(new ConnectionHandler() {
 	    @Override
-	    public void onEvent(final String parameter) {
-		shouldReconnect();
-	    }
+	    public void onStateChanged(final ConnectionEvent event) {
+		// TODO: new semantics, refactor
+		if (event.is(EventType.error)) {
+		    shouldReconnect();
+		} else if (event.is(EventType.beforeRetry)) {
+		    shouldReconnect();
 
-	});
-
-	connection.onRetry(new Listener2<Integer, Integer>() {
-	    @Override
-	    public void onEvent(final Integer attempt, final Integer schedtime) {
-		shouldReconnect();
+		}
 	    }
 	});
 

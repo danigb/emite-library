@@ -13,7 +13,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
 import com.calclab.emite.core.client.xmpp.session.ResultListener;
-import com.calclab.emite.core.client.xmpp.session.Session.State;
+import com.calclab.emite.core.client.xmpp.session.XmppSession.SessionState;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.xep.dataforms.client.Field;
 import com.calclab.emite.xep.dataforms.client.FieldType;
@@ -33,7 +33,7 @@ public class SearchManagerTest {
 	manager = new SearchManagerImpl(session);
 	manager.setHost(XmppURI.uri("search.service"));
 	session.setLoggedIn(XmppURI.uri("romeo@montague.net/home"));
-	session.setState(State.ready);
+	session.setSessionState(SessionState.ready);
     }
 
     /**

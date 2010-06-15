@@ -21,7 +21,9 @@
  */
 package com.calclab.emite.core.client.xmpp.session;
 
-import com.calclab.emite.core.client.conn.Connection;
+import com.calclab.emite.core.client.conn.StanzaReceivedEvent;
+import com.calclab.emite.core.client.conn.StanzaReceivedHandler;
+import com.calclab.emite.core.client.conn.XmppConnection;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
@@ -35,22 +37,24 @@ import com.google.inject.Inject;
  * @see http://www.xmpp.org/extensions/xep-0206.html#preconditions-sasl
  */
 public class IMSessionManager {
-    private final Connection connection;
+    private final XmppConnection connection;
     private final Event<XmppURI> onSessionCreated;
 
     @Inject
-    public IMSessionManager(final Connection connection) {
+    public IMSessionManager(final XmppConnection connection) {
 	this.connection = connection;
 	onSessionCreated = new Event<XmppURI>("sessionManager:onSessionCreated");
 
-	connection.onStanzaReceived(new Listener<IPacket>() {
-	    public void onEvent(final IPacket stanza) {
+	connection.addStanzaReceivedHandler(new StanzaReceivedHandler() {
+	    @Override
+	    public void onStanzaReceived(final StanzaReceivedEvent event) {
+		final IPacket stanza = event.getStanza();
 		if ("im-session-request".equals(stanza.getAttribute("id"))) {
 		    onSessionCreated.fire(XmppURI.uri(stanza.getAttribute("to")));
 		}
 	    }
-
 	});
+
     }
 
     public void onSessionCreated(final Listener<XmppURI> listener) {

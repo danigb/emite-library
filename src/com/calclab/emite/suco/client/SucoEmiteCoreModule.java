@@ -21,10 +21,11 @@
  */
 package com.calclab.emite.suco.client;
 
-import com.calclab.emite.core.client.bosh.BoshConnection;
+import com.calclab.emite.core.client.bosh.XmppBoshConnection;
 import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
 import com.calclab.emite.core.client.bus.EmiteEventBus;
 import com.calclab.emite.core.client.conn.Connection;
+import com.calclab.emite.core.client.conn.XmppConnection;
 import com.calclab.emite.core.client.services.Services;
 import com.calclab.emite.core.client.services.gwt.GWTServices;
 import com.calclab.emite.core.client.xmpp.datetime.XmppDateTime;
@@ -64,15 +65,15 @@ public class SucoEmiteCoreModule extends AbstractModule implements EntryPoint {
 	    public EmiteEventBus create() {
 		return new DefaultEmiteEventBus();
 	    }
-	}, new Factory<Connection>(Connection.class) {
+	}, new Factory<XmppConnection>(XmppConnection.class) {
 	    @Override
-	    public Connection create() {
-		return new BoshConnection($(EmiteEventBus.class), $(Services.class));
+	    public XmppConnection create() {
+		return new XmppBoshConnection($(EmiteEventBus.class), $(Services.class));
 	    }
 	}, new Factory<IMSessionManager>(IMSessionManager.class) {
 	    @Override
 	    public IMSessionManager create() {
-		return new IMSessionManager($(Connection.class));
+		return new IMSessionManager($(XmppConnection.class));
 	    }
 	}, new Factory<Session>(Session.class) {
 	    @Override
@@ -101,7 +102,7 @@ public class SucoEmiteCoreModule extends AbstractModule implements EntryPoint {
 	}, new Factory<SASLManager>(SASLManager.class) {
 	    @Override
 	    public SASLManager create() {
-		return new SASLManager($(Connection.class), $(DecoderRegistry.class));
+		return new SASLManager($(EmiteEventBus.class), $(Connection.class), $(DecoderRegistry.class));
 	    }
 	});
 	register(SessionComponent.class, new Factory<SessionReady>(SessionReady.class) {

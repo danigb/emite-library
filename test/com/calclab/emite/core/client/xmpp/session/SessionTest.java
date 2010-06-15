@@ -17,9 +17,9 @@ import org.junit.Test;
 import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
 import com.calclab.emite.core.client.packet.Packet;
 import com.calclab.emite.core.client.xmpp.resource.ResourceBindingManager;
-import com.calclab.emite.core.client.xmpp.sasl.AuthorizationTransaction;
+import com.calclab.emite.core.client.xmpp.sasl.AuthorizationEvent;
 import com.calclab.emite.core.client.xmpp.sasl.SASLManager;
-import com.calclab.emite.core.client.xmpp.sasl.AuthorizationTransaction.State;
+import com.calclab.emite.core.client.xmpp.session.XmppSession.SessionState;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
@@ -34,11 +34,12 @@ public class SessionTest {
     private ResourceBindingManager bindingManager;
     private IMSessionManager iMSessionManager;
     private ConnectionTester connection;
+    private DefaultEmiteEventBus eventBus;
 
     @Before
     public void beforeTest() {
 	connection = new ConnectionTester();
-	final DefaultEmiteEventBus eventBus = new DefaultEmiteEventBus();
+	eventBus = new DefaultEmiteEventBus();
 	saslManager = mock(SASLManager.class);
 	bindingManager = mock(ResourceBindingManager.class);
 	iMSessionManager = mock(IMSessionManager.class);
@@ -74,26 +75,23 @@ public class SessionTest {
     public void shouldEventStateChanges() {
 	final Listener<Session> listener = mock(Listener.class);
 	session.onStateChanged(listener);
-	session.setState(Session.State.ready);
+	session.setSessionState(SessionState.ready);
 	verify(listener).onEvent(same(session));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void shouldHandleFailedAuthorizationResult() {
 	connection.connect();
-	fire(createTransaction(uri("node@domain"), "password", AuthorizationTransaction.State.failed))
-		.when(saslManager).onAuthorized(anyListener());
+	eventBus.fireEvent(new AuthorizationEvent());
 	assertFalse(connection.isConnected());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void shouldHandleSucceedAuthorizationResult() {
-	fire(createTransaction(uri("node@domain/resource"), "password", AuthorizationTransaction.State.succeed)).when(
-		saslManager).onAuthorized(anyListener());
+	eventBus.fireEvent(new AuthorizationEvent(
+		new Credentials(uri("node@domain"), "pass", Credentials.ENCODING_NONE)));
 
-	assertEquals(Session.State.authorized, session.getState());
+	assertEquals(SessionState.authorized, session.getSessionState());
 	assertTrue(connection.isStreamRestarted());
 	verify(bindingManager).bindResource(anyString());
     }
@@ -133,14 +131,5 @@ public class SessionTest {
     @SuppressWarnings("unchecked")
     private void createSession(final XmppURI uri) {
 	fire(uri).when(iMSessionManager).onSessionCreated(anyListener());
-    }
-
-    private AuthorizationTransaction createTransaction(final XmppURI uri, final String password,
-	    final State transactionState) {
-
-	final Credentials credentials = new Credentials(uri, password, Credentials.ENCODING_NONE);
-	final AuthorizationTransaction authorizationTransaction = new AuthorizationTransaction(credentials);
-	authorizationTransaction.setState(transactionState);
-	return authorizationTransaction;
     }
 }

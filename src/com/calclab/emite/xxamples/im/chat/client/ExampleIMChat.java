@@ -4,7 +4,7 @@ import static com.calclab.emite.core.client.xmpp.stanzas.XmppURI.uri;
 
 import com.calclab.emite.browser.client.PageAssist;
 import com.calclab.emite.core.client.xmpp.session.Session;
-import com.calclab.emite.core.client.xmpp.session.Session.State;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.im.client.chat.Chat;
 import com.calclab.emite.im.client.chat.ChatManager;
@@ -38,7 +38,7 @@ public class ExampleIMChat implements EntryPoint {
 	session.onStateChanged(new Listener<Session>() {
 	    @Override
 	    public void onEvent(Session session) {
-		State state = session.getState();
+		XmppSession.SessionState state = session.getSessionState();
 		log("Current state: " + state);
 	    }
 	});

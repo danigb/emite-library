@@ -5,7 +5,7 @@ import static com.calclab.emite.core.client.xmpp.stanzas.XmppURI.uri;
 import com.calclab.emite.browser.client.EmiteBrowserGinjector;
 import com.calclab.emite.core.client.EmiteCoreGinjector;
 import com.calclab.emite.core.client.xmpp.session.Session;
-import com.calclab.emite.core.client.xmpp.session.Session.State;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.suco.client.events.Listener;
@@ -48,11 +48,11 @@ public class ExampleXmppSession implements EntryPoint {
 	    session.onStateChanged(new Listener<Session>() {
 		@Override
 		public void onEvent(final Session session) {
-		    final State state = session.getState();
-		    if (state == Session.State.loggedIn) {
+		    final XmppSession.SessionState state = session.getSessionState();
+		    if (state == XmppSession.SessionState.loggedIn) {
 			log("We are now online");
 			sendHelloWorldMessage(session);
-		    } else if (state == Session.State.disconnected) {
+		    } else if (state == XmppSession.SessionState.disconnected) {
 			log("We are now offline");
 		    } else {
 			log("Current state: " + state);

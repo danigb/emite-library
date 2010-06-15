@@ -21,7 +21,7 @@
  */
 package com.calclab.emite.browser.client;
 
-import com.calclab.emite.core.client.conn.Connection;
+import com.calclab.emite.core.client.conn.XmppConnection;
 import com.calclab.emite.core.client.xmpp.session.Session;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -51,11 +51,11 @@ public class AutoConfig {
     private static final String PARAM_SESSION = "emite.session";
     protected static final String LOGOUT = "logout";
 
-    private final Connection connection;
+    private final XmppConnection connection;
     private final Session session;
 
     @Inject
-    public AutoConfig(final Connection connection, final Session session) {
+    public AutoConfig(final XmppConnection connection, final Session session) {
 	this.connection = connection;
 	this.session = session;
 	initialize();

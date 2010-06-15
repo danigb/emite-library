@@ -21,8 +21,6 @@
  */
 package com.calclab.emite.core.client.conn;
 
-import com.calclab.emite.core.client.bosh.BoshSettings;
-import com.calclab.emite.core.client.bosh.StreamSettings;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.suco.client.events.Listener;
 import com.calclab.suco.client.events.Listener0;
@@ -31,6 +29,7 @@ import com.calclab.suco.client.events.Listener2;
 /**
  * A connection to a xmpp server.
  */
+@Deprecated
 public interface Connection extends XmppConnection {
 
     public abstract void onConnected(final Listener0 listener);
@@ -46,18 +45,5 @@ public interface Connection extends XmppConnection {
     public abstract void onStanzaReceived(final Listener<IPacket> listener);
 
     public abstract void onStanzaSent(final Listener<IPacket> listener);
-
-    /**
-     * Pause the connection and return a stream settings object that can be
-     * serialized to restore the session
-     * 
-     * @return StreamSettings object if the connection if a stream is present
-     *         (the connection is active), null otherwise
-     */
-    public abstract StreamSettings pause();
-
-    public abstract boolean resume(StreamSettings settings);
-
-    public abstract void setSettings(BoshSettings settings);
 
 }

@@ -10,7 +10,8 @@ import com.calclab.suco.client.events.Listener2;
  * An abstract connection. It has all the boilerplate
  * 
  */
-public abstract class AbstractConnection extends AbstractXmppConnection implements Connection {
+public abstract class AbstractConnection extends AbstractXmppConnection {
+
     public AbstractConnection(final EmiteEventBus eventBus) {
 	super(eventBus);
     }
@@ -87,33 +88,4 @@ public abstract class AbstractConnection extends AbstractXmppConnection implemen
 	    }
 	});
     }
-
-    protected void fireConnected() {
-	eventBus.fireEvent(new ConnectionEvent(ConnectionEvent.EventType.connected));
-    }
-
-    protected void fireDisconnected(final String message) {
-	eventBus.fireEvent(new ConnectionEvent(ConnectionEvent.EventType.connected, message));
-    }
-
-    protected void fireError(final String error) {
-	eventBus.fireEvent(new ConnectionEvent(ConnectionEvent.EventType.error, error));
-    }
-
-    protected void fireResponse(final String response) {
-	eventBus.fireEvent(new ConnectionEvent(ConnectionEvent.EventType.response, response));
-    }
-
-    protected void fireRetry(final Integer attempt, final Integer scedTime) {
-	eventBus.fireEvent(new ConnectionEvent(ConnectionEvent.EventType.beforeRetry, null, attempt));
-    }
-
-    protected void fireStanzaReceived(final IPacket stanza) {
-	eventBus.fireEvent(new StanzaReceivedEvent(stanza));
-    }
-
-    protected void fireStanzaSent(final IPacket packet) {
-	eventBus.fireEvent(new StanzaSentEvent(packet));
-    }
-
 }

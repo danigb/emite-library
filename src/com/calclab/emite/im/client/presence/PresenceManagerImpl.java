@@ -24,7 +24,7 @@ package com.calclab.emite.im.client.presence;
 import java.util.Collection;
 
 import com.calclab.emite.core.client.xmpp.session.Session;
-import com.calclab.emite.core.client.xmpp.session.Session.State;
+import com.calclab.emite.core.client.xmpp.session.XmppSession.SessionState;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence.Type;
@@ -49,7 +49,7 @@ public class PresenceManagerImpl extends AbstractPresenceManager {
 	roster.onRosterRetrieved(new Listener<Collection<RosterItem>>() {
 	    public void onEvent(final Collection<RosterItem> parameter) {
 		GWT.log("Sending initial presence", null);
-		Presence ownPresence = getOwnPresence();
+		final Presence ownPresence = getOwnPresence();
 		final Presence initialPresence = ownPresence != INITIAL_PRESENCE ? ownPresence : new Presence(session
 			.getCurrentUser());
 		session.send(initialPresence);
@@ -72,11 +72,11 @@ public class PresenceManagerImpl extends AbstractPresenceManager {
 
 	session.onStateChanged(new Listener<Session>() {
 	    @Override
-	    public void onEvent(Session session) {
-		State state = session.getState();
-		if (state == Session.State.loggingOut) {
+	    public void onEvent(final Session session) {
+		final SessionState state = session.getSessionState();
+		if (state == SessionState.loggingOut) {
 		    logOut(session.getCurrentUser());
-		} else if (state == Session.State.disconnected) {
+		} else if (state == SessionState.disconnected) {
 		    setOwnPresence(INITIAL_PRESENCE);
 		}
 	    }

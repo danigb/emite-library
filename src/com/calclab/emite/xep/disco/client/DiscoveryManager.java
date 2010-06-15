@@ -28,6 +28,7 @@ import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
 import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ.Type;
@@ -52,7 +53,7 @@ public class DiscoveryManager {
 	session.onStateChanged(new Listener<Session>() {
 	    @Override
 	    public void onEvent(Session session) {
-		if (isActive && session.getState() == Session.State.loggedIn) {
+		if (isActive && session.getSessionState() == XmppSession.SessionState.loggedIn) {
 		    sendDiscoQuery(session.getCurrentUser());
 		}
 	    }

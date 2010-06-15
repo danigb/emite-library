@@ -12,7 +12,7 @@ import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.session.AbstractSession;
 import com.calclab.emite.core.client.xmpp.session.Credentials;
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
@@ -92,9 +92,9 @@ public class SessionTester extends AbstractSession {
 
     public void logout() {
 	if (currentUser != null) {
-	    setState(Session.State.loggingOut);
+	    setSessionState(XmppSession.SessionState.loggingOut);
 	    currentUser = null;
-	    setState(Session.State.disconnected);
+	    setSessionState(XmppSession.SessionState.disconnected);
 	}
     }
 
@@ -147,16 +147,16 @@ public class SessionTester extends AbstractSession {
 
     public void setLoggedIn(final XmppURI userURI) {
 	currentUser = userURI;
-	setState(State.loggedIn);
+	setSessionState(XmppSession.SessionState.loggedIn);
     }
 
     public void setReady() {
-	setState(State.ready);
+	setSessionState(XmppSession.SessionState.ready);
     }
 
     @Override
-    public void setState(final State state) {
-	super.setState(state);
+    public void setSessionState(final XmppSession.SessionState state) {
+	super.setSessionState(state);
     }
 
     public Listener<IPacket> verifyIQSent(final IPacket iq) {

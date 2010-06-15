@@ -28,6 +28,7 @@ import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
 import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
@@ -53,7 +54,7 @@ public class XmppRoster extends AbstractRoster implements Roster {
 	session.onStateChanged(new Listener<Session>() {
 	    @Override
 	    public void onEvent(final Session session) {
-		if (session.getState() == Session.State.loggedIn) {
+		if (session.getSessionState() == XmppSession.SessionState.loggedIn) {
 		    requestRoster(session.getCurrentUser());
 		}
 	    }

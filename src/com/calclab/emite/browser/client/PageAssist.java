@@ -2,9 +2,9 @@ package com.calclab.emite.browser.client;
 
 import static com.calclab.emite.core.client.xmpp.stanzas.XmppURI.uri;
 
-import com.calclab.emite.core.client.bosh.BoshSettings;
 import com.calclab.emite.core.client.bosh.StreamSettings;
-import com.calclab.emite.core.client.conn.Connection;
+import com.calclab.emite.core.client.conn.ConnectionSettings;
+import com.calclab.emite.core.client.conn.XmppConnection;
 import com.calclab.emite.core.client.xmpp.session.Credentials;
 import com.calclab.emite.core.client.xmpp.session.Session;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
@@ -77,7 +77,7 @@ public class PageAssist {
      * @return true if the configuration is perfomed (PARAM_HTTPBASE and
      *         PARAM_HOST are present), false otherwise
      */
-    public static final boolean configureFromMeta(final Connection connection) {
+    public static final boolean configureFromMeta(final XmppConnection connection) {
 	GWT.log("Configuring connection...", null);
 	final String httpBase = getMeta(PARAM_HTTPBASE);
 	final String host = getMeta(PARAM_HOST);
@@ -96,7 +96,7 @@ public class PageAssist {
 
 	if (host != null && httpBase != null) {
 	    GWT.log(("CONNECTION PARAMS: " + httpBase + ", " + host), null);
-	    connection.setSettings(new BoshSettings(httpBase, host, routeHost, routePort, secure));
+	    connection.setSettings(new ConnectionSettings(httpBase, host, routeHost, routePort, secure));
 	    return true;
 	} else {
 	    return false;

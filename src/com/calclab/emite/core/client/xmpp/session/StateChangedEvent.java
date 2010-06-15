@@ -1,6 +1,5 @@
 package com.calclab.emite.core.client.xmpp.session;
 
-import com.calclab.emite.core.client.xmpp.session.Session.State;
 import com.google.gwt.event.shared.GwtEvent;
 
 public class StateChangedEvent extends GwtEvent<StateChangedHandler> {
@@ -11,9 +10,9 @@ public class StateChangedEvent extends GwtEvent<StateChangedHandler> {
 	return TYPE;
     }
 
-    private final State state;
+    private final XmppSession.SessionState state;
 
-    public StateChangedEvent(final State state) {
+    public StateChangedEvent(final XmppSession.SessionState state) {
 	this.state = state;
     }
 
@@ -22,7 +21,7 @@ public class StateChangedEvent extends GwtEvent<StateChangedHandler> {
 	return TYPE;
     }
 
-    public State getState() {
+    public XmppSession.SessionState getState() {
 	return state;
     }
 

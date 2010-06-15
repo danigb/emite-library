@@ -1,8 +1,8 @@
 package com.calclab.emite.core.client.conn;
 
-import com.calclab.emite.core.client.bosh.BoshSettings;
 import com.calclab.emite.core.client.bosh.StreamSettings;
 import com.calclab.emite.core.client.bus.EmiteEventBus;
+import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.Packet;
 import com.google.gwt.event.shared.HandlerRegistration;
 
@@ -13,7 +13,7 @@ public abstract class AbstractXmppConnection implements XmppConnection {
     private boolean active;
     private StreamSettings stream;
     private Packet currentBody;
-    private BoshSettings userSettings;
+    private ConnectionSettings userSettings;
 
     public AbstractXmppConnection(final EmiteEventBus eventBus) {
 	this.eventBus = eventBus;
@@ -48,8 +48,36 @@ public abstract class AbstractXmppConnection implements XmppConnection {
 	return errors;
     }
 
-    public void setSettings(final BoshSettings settings) {
+    public void setSettings(final ConnectionSettings settings) {
 	userSettings = settings;
+    }
+
+    protected void fireConnected() {
+	eventBus.fireEvent(new ConnectionEvent(ConnectionEvent.EventType.connected));
+    }
+
+    protected void fireDisconnected(final String message) {
+	eventBus.fireEvent(new ConnectionEvent(ConnectionEvent.EventType.connected, message));
+    }
+
+    protected void fireError(final String error) {
+	eventBus.fireEvent(new ConnectionEvent(ConnectionEvent.EventType.error, error));
+    }
+
+    protected void fireResponse(final String response) {
+	eventBus.fireEvent(new ConnectionEvent(ConnectionEvent.EventType.response, response));
+    }
+
+    protected void fireRetry(final Integer attempt, final Integer scedTime) {
+	eventBus.fireEvent(new ConnectionEvent(ConnectionEvent.EventType.beforeRetry, null, attempt));
+    }
+
+    protected void fireStanzaReceived(final IPacket stanza) {
+	eventBus.fireEvent(new StanzaReceivedEvent(stanza));
+    }
+
+    protected void fireStanzaSent(final IPacket packet) {
+	eventBus.fireEvent(new StanzaSentEvent(packet));
     }
 
     /**
@@ -66,7 +94,7 @@ public abstract class AbstractXmppConnection implements XmppConnection {
 	return stream;
     }
 
-    protected BoshSettings getUserSettings() {
+    protected ConnectionSettings getUserSettings() {
 	return userSettings;
     }
 

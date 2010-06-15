@@ -32,29 +32,11 @@ import com.google.gwt.event.shared.HandlerRegistration;
 /**
  * Session event plumbing.
  */
-public abstract class AbstractSession implements Session {
-
-    private State state;
-    private final EmiteEventBus eventBus;
+public abstract class AbstractSession extends AbstractXmppSession implements Session {
 
     public AbstractSession(final EmiteEventBus eventBus) {
-	this.eventBus = eventBus;
-	state = State.disconnected;
-    }
+	super(eventBus);
 
-    @Override
-    public HandlerRegistration addIQHandler(final IQHandler handler) {
-	return eventBus.addHandler(IQEvent.getType(), handler);
-    }
-
-    @Override
-    public HandlerRegistration addMessageHandler(final MessageHandler handler) {
-	return eventBus.addHandler(MessageEvent.getType(), handler);
-    }
-
-    @Override
-    public HandlerRegistration addPresenceHandler(final PresenceHandler handler) {
-	return eventBus.addHandler(PresenceEvent.getType(), handler);
     }
 
     @Override
@@ -62,14 +44,11 @@ public abstract class AbstractSession implements Session {
 	return eventBus.addHandler(StateChangedEvent.getType(), handler);
     }
 
-    public Session.State getState() {
-	return state;
-    }
-
     public void login(final XmppURI uri, final String password) {
 	login(new Credentials(uri, password, Credentials.ENCODING_NONE));
     }
 
+    @Override
     public void onIQ(final Listener<IQ> listener) {
 	addIQHandler(new IQHandler() {
 	    @Override
@@ -116,11 +95,6 @@ public abstract class AbstractSession implements Session {
 
     protected void firePresence(final Presence presence) {
 	eventBus.fireEvent(new PresenceEvent(presence));
-    }
-
-    protected void setState(final State state) {
-	this.state = state;
-	eventBus.fireEvent(new StateChangedEvent(state));
     }
 
 }

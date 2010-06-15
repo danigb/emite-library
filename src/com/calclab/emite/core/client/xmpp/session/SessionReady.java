@@ -21,7 +21,6 @@
  */
 package com.calclab.emite.core.client.xmpp.session;
 
-import com.calclab.emite.core.client.xmpp.session.Session.State;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.suco.client.events.Listener;
 import com.google.gwt.core.client.GWT;
@@ -38,8 +37,7 @@ public class SessionReady {
 	    @Override
 	    public void onEvent(final Session session) {
 		GWT.log("SESSION READY: no roster");
-		final State state = session.getState();
-		if (state == State.loggedIn) {
+		if (session.getSessionState() == XmppSession.SessionState.loggedIn) {
 		    session.send(new Presence());
 		    session.setReady();
 		}

@@ -116,7 +116,7 @@ public class PairChat extends AbstractChat {
     }
 
     private void setStateFromSessionState(final Session session) {
-	switch (session.getState()) {
+	switch (session.getSessionState()) {
 	case loggedIn:
 	case ready:
 	    final XmppURI currentUser = session.getCurrentUser();

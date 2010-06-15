@@ -25,10 +25,16 @@ import java.util.ArrayList;
 
 import com.calclab.emite.core.client.bosh.StreamSettings;
 import com.calclab.emite.core.client.bus.EmiteEventBus;
-import com.calclab.emite.core.client.conn.Connection;
+import com.calclab.emite.core.client.conn.ConnectionEvent;
+import com.calclab.emite.core.client.conn.ConnectionHandler;
+import com.calclab.emite.core.client.conn.StanzaReceivedEvent;
+import com.calclab.emite.core.client.conn.StanzaReceivedHandler;
+import com.calclab.emite.core.client.conn.XmppConnection;
+import com.calclab.emite.core.client.conn.ConnectionEvent.EventType;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.resource.ResourceBindingManager;
-import com.calclab.emite.core.client.xmpp.sasl.AuthorizationTransaction;
+import com.calclab.emite.core.client.xmpp.sasl.AuthorizationEvent;
+import com.calclab.emite.core.client.xmpp.sasl.AuthorizationHandler;
 import com.calclab.emite.core.client.xmpp.sasl.SASLManager;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
@@ -43,21 +49,24 @@ import com.google.inject.Inject;
  */
 public class DefaultXmppSession extends AbstractSession implements Session {
     private XmppURI userURI;
-    private final Connection connection;
-    private AuthorizationTransaction transaction;
+    private final XmppConnection connection;
     private final IQManager iqManager;
     private final ArrayList<IPacket> queuedStanzas;
+    private Credentials credentials;
 
     @Inject
-    public DefaultXmppSession(final EmiteEventBus eventBus, final Connection connection, final SASLManager saslManager,
-	    final ResourceBindingManager bindingManager, final IMSessionManager iMSessionManager) {
+    public DefaultXmppSession(final EmiteEventBus eventBus, final XmppConnection connection,
+	    final SASLManager saslManager, final ResourceBindingManager bindingManager,
+	    final IMSessionManager iMSessionManager) {
 	super(eventBus);
 	this.connection = connection;
 	iqManager = new IQManager();
 	queuedStanzas = new ArrayList<IPacket>();
 
-	connection.onStanzaReceived(new Listener<IPacket>() {
-	    public void onEvent(final IPacket stanza) {
+	connection.addStanzaReceivedHandler(new StanzaReceivedHandler() {
+	    @Override
+	    public void onStanzaReceived(final StanzaReceivedEvent event) {
+		final IPacket stanza = event.getStanza();
 		final String name = stanza.getName();
 		if (name.equals("message")) {
 		    fireMessage(new Message(stanza));
@@ -70,38 +79,38 @@ public class DefaultXmppSession extends AbstractSession implements Session {
 		    } else {
 			iqManager.handle(stanza);
 		    }
-		} else if (transaction != null && "stream:features".equals(name) && stanza.hasChild("mechanisms")) {
-		    saslManager.sendAuthorizationRequest(transaction);
-		    transaction = null;
+		} else if (credentials != null && "stream:features".equals(name) && stanza.hasChild("mechanisms")) {
+		    saslManager.sendAuthorizationRequest(credentials);
+		    credentials = null;
 		}
 	    }
 	});
 
-	connection.onError(new Listener<String>() {
-	    public void onEvent(final String msg) {
-		GWT.log("Connection error: " + msg, null);
-		setState(State.error);
-		// Connection takes care of it :
-		// disconnect();
+	connection.addConnectionHandler(new ConnectionHandler() {
+	    @Override
+	    public void onStateChanged(final ConnectionEvent event) {
+		if (event.is(EventType.error)) {
+		    GWT.log("Connection error: " + event.getText());
+		    setSessionState(SessionState.error);
+		} else if (event.is(EventType.disconnected)) {
+		    setSessionState(SessionState.disconnected);
+		}
 	    }
 	});
 
-	connection.onDisconnected(new Listener<String>() {
-	    public void onEvent(final String parameter) {
-		setState(State.disconnected);
-	    }
-	});
-
-	saslManager.onAuthorized(new Listener<AuthorizationTransaction>() {
-	    public void onEvent(final AuthorizationTransaction ticket) {
-		if (ticket.getState() == AuthorizationTransaction.State.succeed) {
-		    setState(Session.State.authorized);
+	eventBus.addHandler(AuthorizationEvent.getType(), new AuthorizationHandler() {
+	    @Override
+	    public void onAuthorization(final AuthorizationEvent event) {
+		if (event.isSucceed()) {
+		    setSessionState(XmppSession.SessionState.authorized);
 		    connection.restartStream();
-		    bindingManager.bindResource(ticket.getXmppUri().getResource());
+		    bindingManager.bindResource(event.getXmppUri().getResource());
 		} else {
-		    setState(Session.State.notAuthorized);
+		    setSessionState(XmppSession.SessionState.notAuthorized);
 		    disconnect();
+
 		}
+
 	    }
 	});
 
@@ -130,24 +139,23 @@ public class DefaultXmppSession extends AbstractSession implements Session {
 
     @Override
     public void login(final Credentials credentials) {
-	if (getState() == Session.State.disconnected) {
-	    setState(Session.State.connecting);
+	if (getSessionState() == XmppSession.SessionState.disconnected) {
+	    setSessionState(XmppSession.SessionState.connecting);
 	    connection.connect();
-	    transaction = new AuthorizationTransaction(credentials);
-	    GWT.log("Sending auth transaction: " + transaction, null);
+	    this.credentials = credentials;
 	}
 
     }
 
     public void logout() {
-	if (getState() != State.disconnected && userURI != null) {
+	if (getSessionState() != XmppSession.SessionState.disconnected && userURI != null) {
 	    // TODO : To be reviewed, preventing unvailable presences to be sent
 	    // so that only the 'terminate' is sent
 	    // Unvailabel are handled automatically by the server
 	    // setState(State.loggingOut);
 	    userURI = null;
 	    connection.disconnect();
-	    setState(State.disconnected);
+	    setSessionState(XmppSession.SessionState.disconnected);
 	}
     }
 
@@ -157,15 +165,16 @@ public class DefaultXmppSession extends AbstractSession implements Session {
 
     public void resume(final XmppURI userURI, final StreamSettings settings) {
 	this.userURI = userURI;
-	setState(State.resume);
+	setSessionState(XmppSession.SessionState.resume);
 	connection.resume(settings);
-	setState(State.ready);
+	setSessionState(XmppSession.SessionState.ready);
     }
 
     public void send(final IPacket packet) {
 	// Added a condition to check the connection is not retrying...
 	if (!connection.hasErrors()
-		&& (getState() == State.loggedIn || getState() == State.ready || getState() == State.loggingOut)) {
+		&& (getSessionState() == XmppSession.SessionState.loggedIn
+			|| getSessionState() == XmppSession.SessionState.ready || getSessionState() == XmppSession.SessionState.loggingOut)) {
 	    packet.setAttribute("from", userURI.toString());
 	    connection.send(packet);
 	} else {
@@ -182,13 +191,13 @@ public class DefaultXmppSession extends AbstractSession implements Session {
 
     public void setReady() {
 	if (isLoggedIn()) {
-	    setState(State.ready);
+	    setSessionState(XmppSession.SessionState.ready);
 	}
     }
 
     @Override
     public String toString() {
-	return "Session " + userURI + " in " + getState() + " " + queuedStanzas.size() + " queued stanzas con="
+	return "Session " + userURI + " in " + getSessionState() + " " + queuedStanzas.size() + " queued stanzas con="
 		+ connection.toString();
     }
 
@@ -209,14 +218,14 @@ public class DefaultXmppSession extends AbstractSession implements Session {
     private void setLoggedIn(final XmppURI userURI) {
 	this.userURI = userURI;
 	GWT.log("SESSION LOGGED IN");
-	setState(Session.State.loggedIn);
+	setSessionState(XmppSession.SessionState.loggedIn);
     }
 
     @Override
-    protected void setState(final Session.State newState) {
-	if (newState == State.ready) {
+    protected void setSessionState(final XmppSession.SessionState newState) {
+	if (newState == XmppSession.SessionState.ready) {
 	    sendQueuedStanzas();
 	}
-	super.setState(newState);
+	super.setSessionState(newState);
     }
 }
