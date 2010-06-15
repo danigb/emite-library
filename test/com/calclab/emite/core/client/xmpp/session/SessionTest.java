@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
 import com.calclab.emite.core.client.packet.Packet;
 import com.calclab.emite.core.client.xmpp.resource.ResourceBindingManager;
 import com.calclab.emite.core.client.xmpp.sasl.AuthorizationTransaction;
@@ -28,7 +29,7 @@ import com.calclab.suco.testing.events.MockedListener;
 
 public class SessionTest {
 
-    private SessionImpl session;
+    private DefaultXmppSession session;
     private SASLManager saslManager;
     private ResourceBindingManager bindingManager;
     private IMSessionManager iMSessionManager;
@@ -37,10 +38,11 @@ public class SessionTest {
     @Before
     public void beforeTest() {
 	connection = new ConnectionTester();
+	final DefaultEmiteEventBus eventBus = new DefaultEmiteEventBus();
 	saslManager = mock(SASLManager.class);
 	bindingManager = mock(ResourceBindingManager.class);
 	iMSessionManager = mock(IMSessionManager.class);
-	session = new SessionImpl(connection, saslManager, bindingManager, iMSessionManager);
+	session = new DefaultXmppSession(eventBus, connection, saslManager, bindingManager, iMSessionManager);
 
     }
 

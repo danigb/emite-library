@@ -23,8 +23,9 @@ package com.calclab.emite.core.client.xmpp.session;
 
 import java.util.ArrayList;
 
-import com.calclab.emite.core.client.bosh.Connection;
 import com.calclab.emite.core.client.bosh.StreamSettings;
+import com.calclab.emite.core.client.bus.EmiteEventBus;
+import com.calclab.emite.core.client.conn.Connection;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.resource.ResourceBindingManager;
 import com.calclab.emite.core.client.xmpp.sasl.AuthorizationTransaction;
@@ -40,7 +41,7 @@ import com.google.inject.Inject;
 /**
  * Default Session implementation. Use Session interface instead.
  */
-public class SessionImpl extends AbstractSession implements Session {
+public class DefaultXmppSession extends AbstractSession implements Session {
     private XmppURI userURI;
     private final Connection connection;
     private AuthorizationTransaction transaction;
@@ -48,8 +49,9 @@ public class SessionImpl extends AbstractSession implements Session {
     private final ArrayList<IPacket> queuedStanzas;
 
     @Inject
-    public SessionImpl(final Connection connection, final SASLManager saslManager,
+    public DefaultXmppSession(final EmiteEventBus eventBus, final Connection connection, final SASLManager saslManager,
 	    final ResourceBindingManager bindingManager, final IMSessionManager iMSessionManager) {
+	super(eventBus);
 	this.connection = connection;
 	iqManager = new IQManager();
 	queuedStanzas = new ArrayList<IPacket>();
@@ -162,7 +164,7 @@ public class SessionImpl extends AbstractSession implements Session {
 
     public void send(final IPacket packet) {
 	// Added a condition to check the connection is not retrying...
-	if (connection.noError()
+	if (!connection.hasErrors()
 		&& (getState() == State.loggedIn || getState() == State.ready || getState() == State.loggingOut)) {
 	    packet.setAttribute("from", userURI.toString());
 	    connection.send(packet);

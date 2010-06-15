@@ -19,8 +19,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package com.calclab.emite.core.client.bosh;
+package com.calclab.emite.core.client.conn;
 
+import com.calclab.emite.core.client.bosh.BoshSettings;
+import com.calclab.emite.core.client.bosh.StreamSettings;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.suco.client.events.Listener;
 import com.calclab.suco.client.events.Listener0;
@@ -29,27 +31,21 @@ import com.calclab.suco.client.events.Listener2;
 /**
  * A connection to a xmpp server.
  */
-public interface Connection {
-
-    public abstract void connect();
-
-    public abstract void disconnect();
-
-    public abstract boolean isConnected();
-
-    public abstract void onError(final Listener<String> listener);
-
-    public abstract void onRetry(final Listener2<Integer, Integer> listener);
-
-    public abstract void onResponse(final Listener<String> listener);
-
-    public abstract void onStanzaReceived(final Listener<IPacket> listener);
-
-    public abstract void onStanzaSent(final Listener<IPacket> listener);
+public interface Connection extends XmppConnection {
 
     public abstract void onConnected(final Listener0 listener);
 
     public abstract void onDisconnected(final Listener<String> listener);
+
+    public abstract void onError(final Listener<String> listener);
+
+    public abstract void onResponse(final Listener<String> listener);
+
+    public abstract void onRetry(final Listener2<Integer, Integer> listener);
+
+    public abstract void onStanzaReceived(final Listener<IPacket> listener);
+
+    public abstract void onStanzaSent(final Listener<IPacket> listener);
 
     /**
      * Pause the connection and return a stream settings object that can be
@@ -60,16 +56,8 @@ public interface Connection {
      */
     public abstract StreamSettings pause();
 
-    public abstract void removeOnStanzaReceived(Listener<IPacket> listener);
-
-    public abstract void restartStream();
-
     public abstract boolean resume(StreamSettings settings);
 
-    public abstract void send(final IPacket packet);
-
     public abstract void setSettings(BoshSettings settings);
-
-    public abstract boolean noError();
 
 }

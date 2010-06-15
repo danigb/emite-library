@@ -23,6 +23,8 @@ package com.calclab.emite.core.client.bosh;
 
 import java.util.List;
 
+import com.calclab.emite.core.client.bus.EmiteEventBus;
+import com.calclab.emite.core.client.conn.AbstractConnection;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.Packet;
 import com.calclab.emite.core.client.services.ConnectorCallback;
@@ -40,7 +42,8 @@ public class BoshConnection extends AbstractConnection {
     private final RetryControl retryControl = new RetryControl();
 
     @Inject
-    public BoshConnection(final Services services) {
+    public BoshConnection(final EmiteEventBus eventBus, final Services services) {
+	super(eventBus);
 	this.services = services;
 
 	listener = new ConnectorCallback() {
@@ -279,8 +282,9 @@ public class BoshConnection extends AbstractConnection {
     }
 
     private void sendBody(final boolean force) {
+	// TODO: better semantics
 	if (force || !shouldCollectResponses && isActive() && activeConnections < getUserSettings().maxRequests
-		&& noError()) {
+		&& !hasErrors()) {
 	    final String request = services.toString(getCurrentBody());
 	    setCurrentBody(null);
 	    send(request);

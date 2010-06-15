@@ -21,31 +21,45 @@
  */
 package com.calclab.emite.core.client.xmpp.session;
 
+import com.calclab.emite.core.client.bus.EmiteEventBus;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
-import com.calclab.suco.client.events.Event;
 import com.calclab.suco.client.events.Listener;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * Session event plumbing.
  */
 public abstract class AbstractSession implements Session {
 
-    private final Event<Session> onStateChanged;
-    private final Event<Presence> onPresence;
-    private final Event<Message> onMessage;
-    private final Event<IQ> onIQ;
     private State state;
+    private final EmiteEventBus eventBus;
 
-    public AbstractSession() {
-	onStateChanged = new Event<Session>("session:onStateChanged");
-	onPresence = new Event<Presence>("session:onPresence");
-	onMessage = new Event<Message>("session:onMessage");
-	onIQ = new Event<IQ>("session:onIQ");
-
+    public AbstractSession(final EmiteEventBus eventBus) {
+	this.eventBus = eventBus;
 	state = State.disconnected;
+    }
+
+    @Override
+    public HandlerRegistration addIQHandler(final IQHandler handler) {
+	return eventBus.addHandler(IQEvent.getType(), handler);
+    }
+
+    @Override
+    public HandlerRegistration addMessageHandler(final MessageHandler handler) {
+	return eventBus.addHandler(MessageEvent.getType(), handler);
+    }
+
+    @Override
+    public HandlerRegistration addPresenceHandler(final PresenceHandler handler) {
+	return eventBus.addHandler(PresenceEvent.getType(), handler);
+    }
+
+    @Override
+    public HandlerRegistration addSessionStateChangedHandler(final StateChangedHandler handler) {
+	return eventBus.addHandler(StateChangedEvent.getType(), handler);
     }
 
     public Session.State getState() {
@@ -57,37 +71,56 @@ public abstract class AbstractSession implements Session {
     }
 
     public void onIQ(final Listener<IQ> listener) {
-	onIQ.add(listener);
+	addIQHandler(new IQHandler() {
+	    @Override
+	    public void onIQ(final IQEvent event) {
+		listener.onEvent(event.getIQ());
+	    }
+	});
     }
 
     public void onMessage(final Listener<Message> listener) {
-	onMessage.add(listener);
+	addMessageHandler(new MessageHandler() {
+	    @Override
+	    public void onMessage(final MessageEvent event) {
+		listener.onEvent(event.getMessage());
+	    }
+	});
     }
 
     public void onPresence(final Listener<Presence> listener) {
-	onPresence.add(listener);
+	addPresenceHandler(new PresenceHandler() {
+	    @Override
+	    public void onPresence(final PresenceEvent event) {
+		listener.onEvent(event.getPresence());
+	    }
+	});
     }
 
     public void onStateChanged(final Listener<Session> listener) {
-	onStateChanged.add(listener);
+	addSessionStateChangedHandler(new StateChangedHandler() {
+	    @Override
+	    public void onStateChanged(final StateChangedEvent event) {
+		listener.onEvent(AbstractSession.this);
+	    }
+	});
     }
 
     protected void fireIQ(final IQ iq) {
-	onIQ.fire(iq);
+	eventBus.fireEvent(new IQEvent(iq));
     }
 
     protected void fireMessage(final Message message) {
-	onMessage.fire(message);
+	eventBus.fireEvent(new MessageEvent(message));
     }
 
     protected void firePresence(final Presence presence) {
-	onPresence.fire(presence);
+	eventBus.fireEvent(new PresenceEvent(presence));
     }
 
     protected void setState(final State state) {
 	this.state = state;
-	onStateChanged.fire(this);
-
+	eventBus.fireEvent(new StateChangedEvent(state));
     }
 
 }

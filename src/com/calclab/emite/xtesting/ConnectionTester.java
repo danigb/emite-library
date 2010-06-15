@@ -2,9 +2,11 @@ package com.calclab.emite.xtesting;
 
 import java.util.ArrayList;
 
-import com.calclab.emite.core.client.bosh.AbstractConnection;
-import com.calclab.emite.core.client.bosh.Connection;
 import com.calclab.emite.core.client.bosh.StreamSettings;
+import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
+import com.calclab.emite.core.client.bus.EmiteEventBus;
+import com.calclab.emite.core.client.conn.AbstractConnection;
+import com.calclab.emite.core.client.conn.Connection;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.xtesting.matchers.IsPacketLike;
 import com.calclab.emite.xtesting.services.TigaseXMLService;
@@ -24,6 +26,11 @@ public class ConnectionTester extends AbstractConnection implements Connection {
     private final ArrayList<IPacket> received;
 
     public ConnectionTester() {
+	this(new DefaultEmiteEventBus());
+    }
+
+    public ConnectionTester(final EmiteEventBus eventBus) {
+	super(eventBus);
 	xmler = new TigaseXMLService();
 	sent = new ArrayList<IPacket>();
 	received = new ArrayList<IPacket>();
@@ -31,23 +38,24 @@ public class ConnectionTester extends AbstractConnection implements Connection {
 
     @Override
     public void connect() {
-	this.isConnected = true;
+	isConnected = true;
     }
 
     @Override
     public void disconnect() {
-	this.isConnected = false;
+	isConnected = false;
     }
 
     public int getSentSize() {
 	return sent.size();
     }
 
-    public boolean hasSent(IPacket packet) {
-	IsPacketLike matcher = new IsPacketLike(packet);
-	for (IPacket stanza : sent) {
-	    if (matcher.matches(stanza, System.out))
+    public boolean hasSent(final IPacket packet) {
+	final IsPacketLike matcher = new IsPacketLike(packet);
+	for (final IPacket stanza : sent) {
+	    if (matcher.matches(stanza, System.out)) {
 		return true;
+	    }
 	}
 	return false;
     }
@@ -63,16 +71,16 @@ public class ConnectionTester extends AbstractConnection implements Connection {
 
     @Override
     public StreamSettings pause() {
-	this.paused = true;
+	paused = true;
 	return null;
     }
 
-    public void receives(IPacket stanza) {
+    public void receives(final IPacket stanza) {
 	received.add(stanza);
 	fireStanzaReceived(stanza);
     }
 
-    public void receives(String stanza) {
+    public void receives(final String stanza) {
 	fireStanzaReceived(xmler.toXML(stanza));
     }
 
@@ -82,7 +90,7 @@ public class ConnectionTester extends AbstractConnection implements Connection {
     }
 
     @Override
-    public boolean resume(StreamSettings settings) {
+    public boolean resume(final StreamSettings settings) {
 	if (paused) {
 	    paused = false;
 	    return true;
@@ -91,12 +99,12 @@ public class ConnectionTester extends AbstractConnection implements Connection {
     }
 
     @Override
-    public void send(IPacket packet) {
+    public void send(final IPacket packet) {
 	sent.add(packet);
 	fireStanzaSent(packet);
     }
 
-    public void send(String stanza) {
+    public void send(final String stanza) {
 	send(xmler.toXML(stanza));
     }
 

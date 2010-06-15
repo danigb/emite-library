@@ -21,7 +21,7 @@
  */
 package com.calclab.emite.core.client.xmpp.sasl;
 
-import com.calclab.emite.core.client.bosh.Connection;
+import com.calclab.emite.core.client.conn.Connection;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.Packet;
 import com.calclab.emite.core.client.xmpp.sasl.AuthorizationTransaction.State;

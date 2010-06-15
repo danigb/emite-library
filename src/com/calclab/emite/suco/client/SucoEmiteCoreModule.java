@@ -22,17 +22,19 @@
 package com.calclab.emite.suco.client;
 
 import com.calclab.emite.core.client.bosh.BoshConnection;
-import com.calclab.emite.core.client.bosh.Connection;
+import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
+import com.calclab.emite.core.client.bus.EmiteEventBus;
+import com.calclab.emite.core.client.conn.Connection;
 import com.calclab.emite.core.client.services.Services;
 import com.calclab.emite.core.client.services.gwt.GWTServices;
 import com.calclab.emite.core.client.xmpp.datetime.XmppDateTime;
 import com.calclab.emite.core.client.xmpp.resource.ResourceBindingManager;
 import com.calclab.emite.core.client.xmpp.sasl.DecoderRegistry;
 import com.calclab.emite.core.client.xmpp.sasl.SASLManager;
+import com.calclab.emite.core.client.xmpp.session.DefaultXmppSession;
 import com.calclab.emite.core.client.xmpp.session.IMSessionManager;
 import com.calclab.emite.core.client.xmpp.session.Session;
 import com.calclab.emite.core.client.xmpp.session.SessionComponent;
-import com.calclab.emite.core.client.xmpp.session.SessionImpl;
 import com.calclab.emite.core.client.xmpp.session.SessionReady;
 import com.calclab.suco.client.Suco;
 import com.calclab.suco.client.ioc.decorator.Singleton;
@@ -57,10 +59,15 @@ public class SucoEmiteCoreModule extends AbstractModule implements EntryPoint {
 	    }
 	});
 
-	register(Singleton.class, new Factory<Connection>(Connection.class) {
+	register(Singleton.class, new Factory<EmiteEventBus>(EmiteEventBus.class) {
+	    @Override
+	    public EmiteEventBus create() {
+		return new DefaultEmiteEventBus();
+	    }
+	}, new Factory<Connection>(Connection.class) {
 	    @Override
 	    public Connection create() {
-		return new BoshConnection($(Services.class));
+		return new BoshConnection($(EmiteEventBus.class), $(Services.class));
 	    }
 	}, new Factory<IMSessionManager>(IMSessionManager.class) {
 	    @Override
@@ -71,8 +78,8 @@ public class SucoEmiteCoreModule extends AbstractModule implements EntryPoint {
 	    @Override
 	    public Session create() {
 		GWT.log("SESSION CREATED!");
-		final SessionImpl session = new SessionImpl($(Connection.class), $(SASLManager.class),
-			$(ResourceBindingManager.class), $(IMSessionManager.class));
+		final DefaultXmppSession session = new DefaultXmppSession($(EmiteEventBus.class), $(Connection.class),
+			$(SASLManager.class), $(ResourceBindingManager.class), $(IMSessionManager.class));
 		return session;
 	    }
 

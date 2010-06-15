@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
 import com.calclab.emite.xtesting.ServicesTester;
 import com.calclab.emite.xtesting.matchers.IsPacketLike;
 
@@ -15,7 +16,8 @@ public class BoshConnectionTests {
 
     public BoshConnectionTests() {
 	services = new ServicesTester();
-	connection = new BoshConnection(services);
+	final DefaultEmiteEventBus eventBus = new DefaultEmiteEventBus();
+	connection = new BoshConnection(eventBus, services);
     }
 
     @Test

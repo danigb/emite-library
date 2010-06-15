@@ -29,13 +29,14 @@ import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Listener;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * The most important object in Xmpp emite module. You can login, send and
  * receive stanzas. It also allows you to pause and resume the session.
  * 
  */
-public interface Session {
+public interface Session extends XmppSession {
 
     /**
      * Different session states. The different states paths are:
@@ -236,4 +237,12 @@ public interface Session {
      * Presence managers should call this method when initial presence is sent
      */
     public void setReady();
+
+    HandlerRegistration addIQHandler(IQHandler handler);
+
+    HandlerRegistration addMessageHandler(MessageHandler handler);
+
+    HandlerRegistration addPresenceHandler(PresenceHandler handler);
+
+    HandlerRegistration addSessionStateChangedHandler(StateChangedHandler handler);
 }

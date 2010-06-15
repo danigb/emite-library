@@ -3,8 +3,8 @@ package com.calclab.emite.browser.client;
 import static com.calclab.emite.core.client.xmpp.stanzas.XmppURI.uri;
 
 import com.calclab.emite.core.client.bosh.BoshSettings;
-import com.calclab.emite.core.client.bosh.Connection;
 import com.calclab.emite.core.client.bosh.StreamSettings;
+import com.calclab.emite.core.client.conn.Connection;
 import com.calclab.emite.core.client.xmpp.session.Credentials;
 import com.calclab.emite.core.client.xmpp.session.Session;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
