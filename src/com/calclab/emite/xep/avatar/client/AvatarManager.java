@@ -26,7 +26,9 @@ import java.util.List;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.IncomingPresenceEvent;
+import com.calclab.emite.core.client.xmpp.session.IncomingPresenceHandler;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
@@ -46,21 +48,24 @@ public class AvatarManager {
     private static final String BINVAL = "BINVAL";
     private final Event<Presence> onHashPresenceReceived;
     private final Event<AvatarVCard> onVCardReceived;
-    private final Session session;
+    private final XmppSession session;
 
-    public AvatarManager(final Session session) {
+    public AvatarManager(final XmppSession session) {
 	this.session = session;
-	this.onHashPresenceReceived = new Event<Presence>("avatar:onHashPresenceReceived");
-	this.onVCardReceived = new Event<AvatarVCard>("avatar:onVCardReceived");
+	onHashPresenceReceived = new Event<Presence>("avatar:onHashPresenceReceived");
+	onVCardReceived = new Event<AvatarVCard>("avatar:onVCardReceived");
 
-	session.onPresence(new Listener<Presence>() {
-	    public void onEvent(final Presence presence) {
+	session.addIncomingPresenceHandler(new IncomingPresenceHandler() {
+	    @Override
+	    public void onIncomingPresence(final IncomingPresenceEvent event) {
+		final Presence presence = event.getPresence();
 		final List<? extends IPacket> children = presence.getChildren(FILTER_X);
 		for (final IPacket child : children) {
 		    if (child.hasAttribute("xmlns", XMLNS + ":x:update")) {
 			onHashPresenceReceived.fire(presence);
 		    }
 		}
+
 	    }
 	});
     }

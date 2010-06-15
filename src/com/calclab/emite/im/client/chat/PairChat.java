@@ -21,11 +21,15 @@
  */
 package com.calclab.emite.im.client.chat;
 
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.events.StateChangedEvent;
+import com.calclab.emite.core.client.events.StateChangedHandler;
+import com.calclab.emite.core.client.xmpp.session.IncomingMessageEvent;
+import com.calclab.emite.core.client.xmpp.session.IncomingMessageHandler;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
+import com.calclab.emite.core.client.xmpp.session.XmppSession.SessionState;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.Message.Type;
-import com.calclab.suco.client.events.Listener;
 
 /**
  * <p>
@@ -45,28 +49,31 @@ public class PairChat extends AbstractChat {
     private final String id;
     private XmppURI user;
 
-    PairChat(final Session session, final XmppURI other, final XmppURI starter, final String thread) {
+    PairChat(final XmppSession session, final XmppURI other, final XmppURI starter, final String thread) {
 	super(session, other, starter);
 	this.thread = thread;
-	this.id = generateChatID();
+	id = generateChatID();
 
 	setStateFromSessionState(session);
 
-	session.onStateChanged(new Listener<Session>() {
+	session.addIncomingMessageHandler(new IncomingMessageHandler() {
 	    @Override
-	    public void onEvent(Session session) {
-		setStateFromSessionState(session);
-	    }
-	});
-
-	session.onMessage(new Listener<Message>() {
-	    public void onEvent(final Message message) {
+	    public void onIncomingMessage(final IncomingMessageEvent event) {
+		final Message message = event.getMessage();
 		final XmppURI from = message.getFrom();
 		if (from.equalsNoResource(uri)) {
 		    receive(message);
 		}
 	    }
 	});
+
+	session.addStateChangedHandler(new StateChangedHandler() {
+	    @Override
+	    public void onStateChanged(final StateChangedEvent event) {
+		setStateFromSessionState(session);
+	    }
+	});
+
     }
 
     @Override
@@ -115,20 +122,20 @@ public class PairChat extends AbstractChat {
 	return "chat: " + uri.toString() + "-" + thread;
     }
 
-    private void setStateFromSessionState(final Session session) {
-	switch (session.getSessionState()) {
-	case loggedIn:
-	case ready:
+    private void setStateFromSessionState(final XmppSession session) {
+	final String state = session.getSessionState();
+
+	if (state == SessionState.loggedIn || state == SessionState.ready) {
 	    final XmppURI currentUser = session.getCurrentUser();
-	    if (this.user == null) {
-		this.user = currentUser;
+	    if (user == null) {
+		user = currentUser;
 	    }
 	    setState(currentUser.equalsNoResource(user) ? State.ready : State.locked);
-	    break;
-	default:
+
+	} else {
 	    setState(State.locked);
-	    break;
 	}
+
     }
 
 }

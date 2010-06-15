@@ -26,7 +26,7 @@ public class ChatStateManagerTest {
     @Before
     public void beforeTests() {
 	session = new SessionTester();
-	chatManager = new PairChatManager(session);
+	chatManager = new PairChatManager(session.getEventBus(), session);
 	session.setLoggedIn(MYSELF);
 	final StateManager stateManager = new StateManager(chatManager);
 	chat = chatManager.open(OTHER);

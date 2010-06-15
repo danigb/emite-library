@@ -8,7 +8,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 
 import com.calclab.emite.core.client.bosh.StreamSettings;
-import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
+import com.calclab.emite.core.client.events.DefaultEmiteEventBus;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.session.AbstractSession;
 import com.calclab.emite.core.client.xmpp.session.Credentials;
@@ -80,6 +81,10 @@ public class SessionTester extends AbstractSession {
 
     public XmppURI getCurrentUser() {
 	return currentUser;
+    }
+
+    public EmiteEventBus getEventBus() {
+	return eventBus;
     }
 
     public boolean isLoggedIn() {
@@ -155,7 +160,7 @@ public class SessionTester extends AbstractSession {
     }
 
     @Override
-    public void setSessionState(final XmppSession.SessionState state) {
+    public void setSessionState(final String state) {
 	super.setSessionState(state);
     }
 

@@ -21,9 +21,9 @@
  */
 package com.calclab.emite.core.client.bosh;
 
-import com.calclab.emite.core.client.bus.EmiteEventBus;
 import com.calclab.emite.core.client.conn.AbstractConnection;
 import com.calclab.emite.core.client.conn.Connection;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.google.inject.Inject;
 

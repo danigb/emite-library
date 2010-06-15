@@ -1,7 +1,7 @@
 package com.calclab.emite.core.client.conn;
 
 import com.calclab.emite.core.client.bosh.StreamSettings;
-import com.calclab.emite.core.client.bus.EmiteEventBus;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.Packet;
 import com.google.gwt.event.shared.HandlerRegistration;

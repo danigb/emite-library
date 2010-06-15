@@ -23,7 +23,7 @@ package com.calclab.emite.im.client.chat;
 
 import java.util.HashMap;
 
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Event;
@@ -35,24 +35,24 @@ public abstract class AbstractChat implements Chat {
     protected State state;
     private final Event<State> onStateChanged;
     private final Event<Message> onBeforeReceive;
-    private final Session session;
+    private final XmppSession session;
     private final HashMap<Class<?>, Object> data;
     private final Event<Message> onMessageSent;
     private final Event<Message> onMessageReceived;
     private final Event<Message> onBeforeSend;
     private final XmppURI starter;
 
-    public AbstractChat(final Session session, final XmppURI uri, final XmppURI starter) {
+    public AbstractChat(final XmppSession session, final XmppURI uri, final XmppURI starter) {
 	this.session = session;
 	this.uri = uri;
 	this.starter = starter;
-	this.data = new HashMap<Class<?>, Object>();
-	this.state = Chat.State.locked;
-	this.onStateChanged = new Event<State>("chat:onStateChanged");
-	this.onMessageSent = new Event<Message>("chat:onMessageSent");
-	this.onMessageReceived = new Event<Message>("chat:onMessageReceived");
-	this.onBeforeSend = new Event<Message>("chat:onBeforeSend");
-	this.onBeforeReceive = new Event<Message>("chat:onBeforeReceive");
+	data = new HashMap<Class<?>, Object>();
+	state = Chat.State.locked;
+	onStateChanged = new Event<State>("chat:onStateChanged");
+	onMessageSent = new Event<Message>("chat:onMessageSent");
+	onMessageReceived = new Event<Message>("chat:onMessageReceived");
+	onBeforeSend = new Event<Message>("chat:onBeforeSend");
+	onBeforeReceive = new Event<Message>("chat:onBeforeReceive");
     }
 
     @SuppressWarnings("unchecked")
@@ -104,7 +104,7 @@ public abstract class AbstractChat implements Chat {
 	return (T) data.put(type, value);
     }
 
-    protected void fireBeforeReceive(Message message) {
+    protected void fireBeforeReceive(final Message message) {
 	onBeforeReceive.fire(message);
     }
 

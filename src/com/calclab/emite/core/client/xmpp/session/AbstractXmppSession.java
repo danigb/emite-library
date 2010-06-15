@@ -1,11 +1,12 @@
 package com.calclab.emite.core.client.xmpp.session;
 
-import com.calclab.emite.core.client.bus.EmiteEventBus;
+import com.calclab.emite.core.client.events.EmiteEventBus;
+import com.calclab.emite.core.client.events.StateChangedEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 public abstract class AbstractXmppSession implements XmppSession {
     protected final EmiteEventBus eventBus;
-    private SessionState state;
+    private String state;
 
     public AbstractXmppSession(final EmiteEventBus eventBus) {
 	this.eventBus = eventBus;
@@ -13,25 +14,25 @@ public abstract class AbstractXmppSession implements XmppSession {
     }
 
     @Override
-    public HandlerRegistration addIQHandler(final IQHandler handler) {
-	return eventBus.addHandler(IQEvent.getType(), handler);
+    public HandlerRegistration addIncomingIQHandler(final IncomingIQHandler handler) {
+	return eventBus.addHandler(IncomingIQEvent.getType(), handler);
     }
 
     @Override
-    public HandlerRegistration addMessageHandler(final MessageHandler handler) {
-	return eventBus.addHandler(MessageEvent.getType(), handler);
+    public HandlerRegistration addIncomingMessageHandler(final IncomingMessageHandler handler) {
+	return eventBus.addHandler(IncomingMessageEvent.getType(), handler);
     }
 
     @Override
-    public HandlerRegistration addPresenceHandler(final PresenceHandler handler) {
-	return eventBus.addHandler(PresenceEvent.getType(), handler);
+    public HandlerRegistration addIncomingPresenceHandler(final IncomingPresenceHandler handler) {
+	return eventBus.addHandler(IncomingPresenceEvent.getType(), handler);
     }
 
-    public SessionState getSessionState() {
+    public String getSessionState() {
 	return state;
     }
 
-    protected void setSessionState(final SessionState state) {
+    protected void setSessionState(final String state) {
 	this.state = state;
 	eventBus.fireEvent(new StateChangedEvent(state));
     }

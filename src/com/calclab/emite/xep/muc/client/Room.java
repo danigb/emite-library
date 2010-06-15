@@ -26,11 +26,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.calclab.emite.core.client.events.StateChangedEvent;
+import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
 import com.calclab.emite.core.client.xmpp.datetime.XmppDateTime;
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.IncomingPresenceEvent;
+import com.calclab.emite.core.client.xmpp.session.IncomingPresenceHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.BasicStanza;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
@@ -61,7 +64,7 @@ public class Room extends AbstractChat implements Chat {
     protected final Event<Occupant> onOccupantRemoved;
 
     protected final Event2<Occupant, String> onSubjectChanged;
-    protected final Session session;
+    protected final XmppSession session;
     private final Event2<XmppURI, String> onInvitationSent;
 
     /**
@@ -72,7 +75,8 @@ public class Room extends AbstractChat implements Chat {
      * @param roomURI
      *            the room uri with the nick specified in the resource part
      */
-    public Room(final Session session, final XmppURI roomURI, final XmppURI starter, final HistoryOptions historyOptions) {
+    public Room(final XmppSession session, final XmppURI roomURI, final XmppURI starter,
+	    final HistoryOptions historyOptions) {
 	super(session, roomURI, starter);
 	this.session = session;
 	occupantsByURI = new LinkedHashMap<XmppURI, Occupant>();
@@ -83,8 +87,11 @@ public class Room extends AbstractChat implements Chat {
 	onInvitationSent = new Event2<XmppURI, String>("room:onInvitationSent");
 
 	// @see http://www.xmpp.org/extensions/xep-0045.html#createroom
-	session.onPresence(new Listener<Presence>() {
-	    public void onEvent(final Presence presence) {
+
+	session.addIncomingPresenceHandler(new IncomingPresenceHandler() {
+	    @Override
+	    public void onIncomingPresence(final IncomingPresenceEvent event) {
+		final Presence presence = event.getPresence();
 		final XmppURI occupantURI = presence.getFrom();
 		if (roomURI.equalsNoResource(occupantURI)) {
 		    handlePresence(occupantURI, presence);
@@ -92,10 +99,11 @@ public class Room extends AbstractChat implements Chat {
 	    }
 	});
 
-	session.onStateChanged(new Listener<Session>() {
+	session.addStateChangedHandler(new StateChangedHandler() {
+
 	    @Override
-	    public void onEvent(final Session session) {
-		final XmppSession.SessionState state = session.getSessionState();
+	    public void onStateChanged(final StateChangedEvent event) {
+		final String state = event.getState();
 		if (XmppSession.SessionState.loggedIn == state) {
 		} else if (XmppSession.SessionState.loggingOut == state) {
 		    close();

@@ -24,10 +24,11 @@ package com.calclab.emite.xep.disco.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.calclab.emite.core.client.events.StateChangedEvent;
+import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
-import com.calclab.emite.core.client.xmpp.session.Session;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
@@ -40,26 +41,26 @@ public class DiscoveryManager {
     private final PacketMatcher filterQuery;
     private ArrayList<Feature> features;
     private ArrayList<Identity> identities;
-    private final Session session;
+    private final XmppSession session;
     private boolean isReady;
     private boolean isActive;
 
-    public DiscoveryManager(final Session session) {
+    public DiscoveryManager(final XmppSession session) {
 	this.session = session;
-	this.onReady = new Event<DiscoveryManager>("discoveryManager:onReady");
-	this.filterQuery = MatcherFactory.byNameAndXMLNS("query", "http://jabber.org/protocol/disco#info");
-	this.isActive = false;
+	onReady = new Event<DiscoveryManager>("discoveryManager:onReady");
+	filterQuery = MatcherFactory.byNameAndXMLNS("query", "http://jabber.org/protocol/disco#info");
+	isActive = false;
 
-	session.onStateChanged(new Listener<Session>() {
+	session.addStateChangedHandler(new StateChangedHandler() {
 	    @Override
-	    public void onEvent(Session session) {
+	    public void onStateChanged(final StateChangedEvent event) {
 		if (isActive && session.getSessionState() == XmppSession.SessionState.loggedIn) {
 		    sendDiscoQuery(session.getCurrentUser());
 		}
 	    }
 	});
 
-	this.isReady = false;
+	isReady = false;
     }
 
     public ArrayList<Feature> getFeatures() {
@@ -78,8 +79,9 @@ public class DiscoveryManager {
      */
     public void onReady(final Listener<DiscoveryManager> listener) {
 	onReady.add(listener);
-	if (isReady)
+	if (isReady) {
 	    listener.onEvent(this);
+	}
     }
 
     public void sendDiscoQuery(final XmppURI uri) {
@@ -96,19 +98,19 @@ public class DiscoveryManager {
 	});
     }
 
-    public void setActive(boolean isActive) {
+    public void setActive(final boolean isActive) {
 	this.isActive = isActive;
     }
 
     private void processFeatures(final List<? extends IPacket> children) {
-	this.features = new ArrayList<Feature>();
+	features = new ArrayList<Feature>();
 	for (final IPacket child : children) {
 	    features.add(Feature.fromPacket(child));
 	}
     }
 
     private void processIdentity(final List<? extends IPacket> children) {
-	this.identities = new ArrayList<Identity>();
+	identities = new ArrayList<Identity>();
 	for (final IPacket child : children) {
 	    identities.add(Identity.fromPacket(child));
 	}

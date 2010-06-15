@@ -24,13 +24,13 @@ package com.calclab.emite.core.client.xmpp.session;
 import java.util.ArrayList;
 
 import com.calclab.emite.core.client.bosh.StreamSettings;
-import com.calclab.emite.core.client.bus.EmiteEventBus;
 import com.calclab.emite.core.client.conn.ConnectionEvent;
 import com.calclab.emite.core.client.conn.ConnectionHandler;
 import com.calclab.emite.core.client.conn.StanzaReceivedEvent;
 import com.calclab.emite.core.client.conn.StanzaReceivedHandler;
 import com.calclab.emite.core.client.conn.XmppConnection;
 import com.calclab.emite.core.client.conn.ConnectionEvent.EventType;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.resource.ResourceBindingManager;
 import com.calclab.emite.core.client.xmpp.sasl.AuthorizationEvent;
@@ -222,7 +222,7 @@ public class DefaultXmppSession extends AbstractSession implements Session {
     }
 
     @Override
-    protected void setSessionState(final XmppSession.SessionState newState) {
+    protected void setSessionState(final String newState) {
 	if (newState == XmppSession.SessionState.ready) {
 	    sendQueuedStanzas();
 	}

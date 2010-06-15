@@ -21,9 +21,10 @@
  */
 package com.calclab.emite.im.client;
 
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.xmpp.session.SessionComponent;
 import com.calclab.emite.core.client.xmpp.session.SessionReady;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.im.client.chat.ChatManager;
 import com.calclab.emite.im.client.chat.PairChatManager;
 import com.calclab.emite.im.client.presence.PresenceManager;
@@ -72,22 +73,22 @@ public class InstantMessagingModule extends AbstractModule implements EntryPoint
 	register(SessionComponent.class, new Factory<Roster>(Roster.class) {
 	    @Override
 	    public Roster create() {
-		return new XmppRoster($(Session.class));
+		return new XmppRoster($(XmppSession.class));
 	    }
 	}, new Factory<ChatManager>(ChatManager.class) {
 	    @Override
 	    public PairChatManager create() {
-		return new PairChatManager($(Session.class));
+		return new PairChatManager($(EmiteEventBus.class), $(XmppSession.class));
 	    }
 	}, new Factory<SubscriptionManager>(SubscriptionManager.class) {
 	    @Override
 	    public SubscriptionManager create() {
-		return new SubscriptionManagerImpl($(Session.class), $(Roster.class));
+		return new SubscriptionManagerImpl($(XmppSession.class), $(Roster.class));
 	    }
 	}, new Factory<PresenceManager>(PresenceManager.class) {
 	    @Override
 	    public PresenceManager create() {
-		return new PresenceManagerImpl($(Session.class), $(Roster.class));
+		return new PresenceManagerImpl($(EmiteEventBus.class), $(XmppSession.class), $(Roster.class));
 	    }
 	});
 

@@ -24,10 +24,15 @@ package com.calclab.emite.im.client.roster;
 import java.util.Collection;
 import java.util.List;
 
+import com.calclab.emite.core.client.events.StateChangedEvent;
+import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.IncomingIQEvent;
+import com.calclab.emite.core.client.xmpp.session.IncomingIQHandler;
+import com.calclab.emite.core.client.xmpp.session.IncomingPresenceEvent;
+import com.calclab.emite.core.client.xmpp.session.IncomingPresenceHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
@@ -46,22 +51,24 @@ public class XmppRoster extends AbstractRoster implements Roster {
 
     private static final PacketMatcher ROSTER_QUERY_FILTER = MatcherFactory.byNameAndXMLNS("query", "jabber:iq:roster");
 
-    private final Session session;
+    private final XmppSession session;
 
-    public XmppRoster(final Session session) {
+    public XmppRoster(final XmppSession session) {
 	this.session = session;
 
-	session.onStateChanged(new Listener<Session>() {
+	session.addStateChangedHandler(new StateChangedHandler() {
 	    @Override
-	    public void onEvent(final Session session) {
+	    public void onStateChanged(final StateChangedEvent event) {
 		if (session.getSessionState() == XmppSession.SessionState.loggedIn) {
 		    requestRoster(session.getCurrentUser());
 		}
 	    }
 	});
 
-	session.onPresence(new Listener<Presence>() {
-	    public void onEvent(final Presence presence) {
+	session.addIncomingPresenceHandler(new IncomingPresenceHandler() {
+	    @Override
+	    public void onIncomingPresence(final IncomingPresenceEvent event) {
+		final Presence presence = event.getPresence();
 		final RosterItem item = getItemByJID(presence.getFrom());
 		if (item != null) {
 		    setPresence(presence, item);
@@ -82,8 +89,10 @@ public class XmppRoster extends AbstractRoster implements Roster {
 	    }
 	});
 
-	session.onIQ(new Listener<IQ>() {
-	    public void onEvent(final IQ iq) {
+	session.addIncomingIQHandler(new IncomingIQHandler() {
+	    @Override
+	    public void onIQ(IncomingIQEvent event) {
+		IQ iq = event.getIQ();
 		if (iq.isType(IQ.Type.set)) {
 		    final IPacket query = iq.getFirstChild(ROSTER_QUERY_FILTER);
 		    if (query != null) {
@@ -94,8 +103,8 @@ public class XmppRoster extends AbstractRoster implements Roster {
 		    session.send(new IQ(Type.result).With("to", iq.getFromAsString()).With("id", iq.getId()));
 		}
 	    }
-
 	});
+
     }
 
     public void removeItem(final XmppURI uri) {

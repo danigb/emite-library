@@ -21,10 +21,10 @@
  */
 package com.calclab.emite.core.client.xmpp.sasl;
 
-import com.calclab.emite.core.client.bus.EmiteEventBus;
 import com.calclab.emite.core.client.conn.StanzaReceivedEvent;
 import com.calclab.emite.core.client.conn.StanzaReceivedHandler;
 import com.calclab.emite.core.client.conn.XmppConnection;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.Packet;
 import com.calclab.emite.core.client.xmpp.session.Credentials;

@@ -23,7 +23,12 @@ package com.calclab.emite.im.client.presence;
 
 import java.util.Collection;
 
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.events.EmiteEventBus;
+import com.calclab.emite.core.client.events.StateChangedEvent;
+import com.calclab.emite.core.client.events.StateChangedHandler;
+import com.calclab.emite.core.client.xmpp.session.IncomingPresenceEvent;
+import com.calclab.emite.core.client.xmpp.session.IncomingPresenceHandler;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.session.XmppSession.SessionState;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
@@ -38,9 +43,10 @@ import com.google.gwt.core.client.GWT;
  */
 public class PresenceManagerImpl extends AbstractPresenceManager {
     static final Presence INITIAL_PRESENCE = new Presence(Type.unavailable, null, null);
-    private final Session session;
+    private final XmppSession session;
 
-    public PresenceManagerImpl(final Session session, final Roster roster) {
+    public PresenceManagerImpl(final EmiteEventBus eventBus, final XmppSession session, final Roster roster) {
+	super(eventBus);
 	this.session = session;
 	setOwnPresence(INITIAL_PRESENCE);
 
@@ -58,8 +64,10 @@ public class PresenceManagerImpl extends AbstractPresenceManager {
 	    }
 	});
 
-	session.onPresence(new Listener<Presence>() {
-	    public void onEvent(final Presence presence) {
+	session.addIncomingPresenceHandler(new IncomingPresenceHandler() {
+	    @Override
+	    public void onIncomingPresence(final IncomingPresenceEvent event) {
+		final Presence presence = event.getPresence();
 		final Type type = presence.getType();
 		if (type == Type.probe) {
 		    session.send(getOwnPresence());
@@ -70,10 +78,10 @@ public class PresenceManagerImpl extends AbstractPresenceManager {
 	    }
 	});
 
-	session.onStateChanged(new Listener<Session>() {
+	session.addStateChangedHandler(new StateChangedHandler() {
 	    @Override
-	    public void onEvent(final Session session) {
-		final SessionState state = session.getSessionState();
+	    public void onStateChanged(final StateChangedEvent event) {
+		final String state = event.getState();
 		if (state == SessionState.loggingOut) {
 		    logOut(session.getCurrentUser());
 		} else if (state == SessionState.disconnected) {

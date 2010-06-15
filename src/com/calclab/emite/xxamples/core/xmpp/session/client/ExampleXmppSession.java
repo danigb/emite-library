@@ -4,11 +4,15 @@ import static com.calclab.emite.core.client.xmpp.stanzas.XmppURI.uri;
 
 import com.calclab.emite.browser.client.EmiteBrowserGinjector;
 import com.calclab.emite.core.client.EmiteCoreGinjector;
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.events.StateChangedEvent;
+import com.calclab.emite.core.client.events.StateChangedHandler;
+import com.calclab.emite.core.client.xmpp.session.IncomingMessageEvent;
+import com.calclab.emite.core.client.xmpp.session.IncomingMessageHandler;
+import com.calclab.emite.core.client.xmpp.session.IncomingPresenceEvent;
+import com.calclab.emite.core.client.xmpp.session.IncomingPresenceHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
-import com.calclab.suco.client.events.Listener;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Label;
@@ -39,19 +43,21 @@ public class ExampleXmppSession implements EntryPoint {
 	    GWT.log("Create session");
 	    final ExampleGinjector gin = GWT.create(ExampleGinjector.class);
 	    gin.getAutoConfig();
-	    final Session session = gin.getSession();
+	    final XmppSession session = gin.getSession();
 
 	    /*
 	     * We track session state changes. We can only send messages when
 	     * the state == loggedIn.
 	     */
-	    session.onStateChanged(new Listener<Session>() {
+	    session.addStateChangedHandler(new StateChangedHandler() {
 		@Override
-		public void onEvent(final Session session) {
-		    final XmppSession.SessionState state = session.getSessionState();
+		public void onStateChanged(final StateChangedEvent event) {
+		    final String state = event.getState();
 		    if (state == XmppSession.SessionState.loggedIn) {
 			log("We are now online");
-			sendHelloWorldMessage(session);
+			// The simplest way to send a messsage
+			final Message message = new Message("hello world!", uri("everybody@world.org"));
+			session.send(message);
 		    } else if (state == XmppSession.SessionState.disconnected) {
 			log("We are now offline");
 		    } else {
@@ -63,8 +69,10 @@ public class ExampleXmppSession implements EntryPoint {
 	    /*
 	     * We show every incoming message in the GWT log console
 	     */
-	    session.onMessage(new Listener<Message>() {
-		public void onEvent(final Message message) {
+	    session.addIncomingMessageHandler(new IncomingMessageHandler() {
+		@Override
+		public void onIncomingMessage(final IncomingMessageEvent event) {
+		    final Message message = event.getMessage();
 		    log("Messaged received from " + message.getFrom() + ":" + message.getBody());
 		}
 	    });
@@ -72,8 +80,10 @@ public class ExampleXmppSession implements EntryPoint {
 	    /*
 	     * We show (log) every incoming presence stanzas
 	     */
-	    session.onPresence(new Listener<Presence>() {
-		public void onEvent(final Presence presence) {
+	    session.addIncomingPresenceHandler(new IncomingPresenceHandler() {
+		@Override
+		public void onIncomingPresence(final IncomingPresenceEvent event) {
+		    final Presence presence = event.getPresence();
 		    log("Presence received from " + presence.getFrom() + ": " + presence.toString());
 		}
 	    });
@@ -84,11 +94,4 @@ public class ExampleXmppSession implements EntryPoint {
 	panel.add(new Label(text));
     }
 
-    /**
-     * The simplest way to send a message using the Session object
-     */
-    private void sendHelloWorldMessage(final Session session) {
-	final Message message = new Message("hello world!", uri("everybody@world.org"));
-	session.send(message);
-    }
 }

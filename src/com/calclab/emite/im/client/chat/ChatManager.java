@@ -25,6 +25,7 @@ import java.util.Collection;
 
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Listener;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * Create and manage chat conversations.
@@ -78,6 +79,14 @@ public interface ChatManager {
      * @return the Chat object
      */
     public Chat open(XmppURI uri);
+
+    HandlerRegistration addChatChangedHandler(ChatChangedHandler handler);
+
+    HandlerRegistration addChatClosedHandler(ChatChangedHandler handler);
+
+    HandlerRegistration addChatCreatedHandler(ChatChangedHandler handler);
+
+    HandlerRegistration addChatOpenedHandler(ChatChangedHandler handler);
 
     /**
      * Get a chat by uri. Can be null

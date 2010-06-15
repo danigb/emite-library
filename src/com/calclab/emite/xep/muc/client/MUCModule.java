@@ -21,8 +21,9 @@
  */
 package com.calclab.emite.xep.muc.client;
 
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.xmpp.session.SessionComponent;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.suco.client.Suco;
 import com.calclab.suco.client.ioc.Container;
 import com.calclab.suco.client.ioc.module.AbstractModule;
@@ -47,7 +48,7 @@ public class MUCModule extends AbstractModule implements EntryPoint {
 	register(SessionComponent.class, new Factory<RoomManager>(RoomManager.class) {
 	    @Override
 	    public RoomManager create() {
-		return new RoomManagerImpl($(Session.class));
+		return new RoomManagerImpl($(EmiteEventBus.class), $(XmppSession.class));
 	    }
 	});
     }

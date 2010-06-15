@@ -22,10 +22,10 @@
 package com.calclab.emite.suco.client;
 
 import com.calclab.emite.core.client.bosh.XmppBoshConnection;
-import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
-import com.calclab.emite.core.client.bus.EmiteEventBus;
 import com.calclab.emite.core.client.conn.Connection;
 import com.calclab.emite.core.client.conn.XmppConnection;
+import com.calclab.emite.core.client.events.DefaultEmiteEventBus;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.services.Services;
 import com.calclab.emite.core.client.services.gwt.GWTServices;
 import com.calclab.emite.core.client.xmpp.datetime.XmppDateTime;
@@ -37,6 +37,7 @@ import com.calclab.emite.core.client.xmpp.session.IMSessionManager;
 import com.calclab.emite.core.client.xmpp.session.Session;
 import com.calclab.emite.core.client.xmpp.session.SessionComponent;
 import com.calclab.emite.core.client.xmpp.session.SessionReady;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.suco.client.Suco;
 import com.calclab.suco.client.ioc.decorator.Singleton;
 import com.calclab.suco.client.ioc.module.AbstractModule;
@@ -92,7 +93,7 @@ public class SucoEmiteCoreModule extends AbstractModule implements EntryPoint {
 	}, new Factory<ResourceBindingManager>(ResourceBindingManager.class) {
 	    @Override
 	    public ResourceBindingManager create() {
-		return new ResourceBindingManager($(Connection.class));
+		return new ResourceBindingManager($(XmppConnection.class));
 	    }
 	}, new Factory<DecoderRegistry>(DecoderRegistry.class) {
 	    @Override
@@ -102,13 +103,13 @@ public class SucoEmiteCoreModule extends AbstractModule implements EntryPoint {
 	}, new Factory<SASLManager>(SASLManager.class) {
 	    @Override
 	    public SASLManager create() {
-		return new SASLManager($(EmiteEventBus.class), $(Connection.class), $(DecoderRegistry.class));
+		return new SASLManager($(EmiteEventBus.class), $(XmppConnection.class), $(DecoderRegistry.class));
 	    }
 	});
 	register(SessionComponent.class, new Factory<SessionReady>(SessionReady.class) {
 	    @Override
 	    public SessionReady create() {
-		return new SessionReady($(Session.class));
+		return new SessionReady($(XmppSession.class));
 	    }
 	});
 

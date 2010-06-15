@@ -141,7 +141,7 @@ public class ChatManagerTest extends AbstractChatManagerTest {
 
     @Override
     protected PairChatManager createChatManager() {
-	final PairChatManager chatManagerDefault = new PairChatManager(session);
+	final PairChatManager chatManagerDefault = new PairChatManager(session.getEventBus(), session);
 	return chatManagerDefault;
     }
 }

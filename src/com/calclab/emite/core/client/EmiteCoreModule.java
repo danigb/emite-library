@@ -2,10 +2,10 @@ package com.calclab.emite.core.client;
 
 import com.calclab.emite.core.client.bosh.BoshConnection;
 import com.calclab.emite.core.client.bosh.XmppBoshConnection;
-import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
-import com.calclab.emite.core.client.bus.EmiteEventBus;
 import com.calclab.emite.core.client.conn.Connection;
 import com.calclab.emite.core.client.conn.XmppConnection;
+import com.calclab.emite.core.client.events.DefaultEmiteEventBus;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.services.Services;
 import com.calclab.emite.core.client.services.gwt.GWTServices;
 import com.calclab.emite.core.client.xmpp.session.DefaultXmppSession;

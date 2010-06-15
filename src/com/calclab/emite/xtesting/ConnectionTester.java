@@ -3,10 +3,10 @@ package com.calclab.emite.xtesting;
 import java.util.ArrayList;
 
 import com.calclab.emite.core.client.bosh.StreamSettings;
-import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
-import com.calclab.emite.core.client.bus.EmiteEventBus;
 import com.calclab.emite.core.client.conn.AbstractConnection;
 import com.calclab.emite.core.client.conn.Connection;
+import com.calclab.emite.core.client.events.DefaultEmiteEventBus;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.xtesting.matchers.IsPacketLike;
 import com.calclab.emite.xtesting.services.TigaseXMLService;

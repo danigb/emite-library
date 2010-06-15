@@ -14,7 +14,7 @@ import static org.mockito.Mockito.verify;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
+import com.calclab.emite.core.client.events.DefaultEmiteEventBus;
 import com.calclab.emite.core.client.packet.Packet;
 import com.calclab.emite.core.client.xmpp.resource.ResourceBindingManager;
 import com.calclab.emite.core.client.xmpp.sasl.AuthorizationEvent;

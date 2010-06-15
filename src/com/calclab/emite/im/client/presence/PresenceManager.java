@@ -23,6 +23,7 @@ package com.calclab.emite.im.client.presence;
 
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.suco.client.events.Listener;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * Handles the user's presence state. Provides event to know when it changes.
@@ -32,6 +33,13 @@ import com.calclab.suco.client.events.Listener;
  * @see http://xmpp.org/rfcs/rfc3921.html#presence
  */
 public interface PresenceManager {
+    HandlerRegistration addOwnPresenceChangedHandler(OwnPresenceChangedHandler handler);
+
+    /**
+     * Change the current user presence
+     */
+    void changeOwnPresence(Presence presence);
+
     /**
      * Get the current user's presence
      * 
@@ -45,9 +53,4 @@ public interface PresenceManager {
      * @param listener
      */
     void onOwnPresenceChanged(Listener<Presence> listener);
-
-    /**
-     * Change the current user presence
-     */
-    void changeOwnPresence(Presence presence);
 }

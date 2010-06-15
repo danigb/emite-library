@@ -1,6 +1,7 @@
 package com.calclab.emite.core.client.xmpp.session;
 
 import com.calclab.emite.core.client.bosh.StreamSettings;
+import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
@@ -23,41 +24,49 @@ public interface XmppSession {
      * <li>Loging out: (ready) - loggingOut - disconnected</li>
      * </ul>
      */
-    public static enum SessionState {
-	/**
+    public static class SessionState {
+	/*
 	 * The authorization was successfull. You can NOT send stanzas using the
 	 * session (stanzas will be queued). If you need to send stanzas, use
 	 * the connection object directly
 	 */
-	authorized,
+	public static final String authorized = "authorized";
+
 	/**
 	 * You are logged in. This is the first state when you can send stanzas.
 	 */
-	loggedIn,
+	public static final String loggedIn = "loggedin";
+
 	/**
 	 * Start login process. You can NOT send stanzas using session (you
 	 * should use the connection directly)
 	 */
-	connecting,
+	public static final String connecting = "connecting";
+
 	/**
 	 * We are disconnected. You can NOT send stanzas.
 	 */
-	disconnected, error, notAuthorized,
+	public static final String disconnected = "disconnected";
+	public static final String error = "error";
+	public static final String notAuthorized = "notAuthorized";
+
 	/**
 	 * The session is ready to use. All the queued stanzas are sent just
 	 * before this state.
 	 */
-	ready,
+	public static final String ready = "ready";
+
 	/**
-	 * We are loggin out. Last oportunity to send stanzas (i.e: last
+	 * We are logging out. Last oportunity to send stanzas (i.e: last
 	 * presence). session.getCurrentUser() returns the current user;
 	 */
-	loggingOut,
+	public static final String loggingOut = "loggingOut";
+
 	/**
 	 * We are resuming a session. When resuming a session you only receive
 	 * "resuming" and "ready" (not loggedIn)
 	 */
-	resume
+	public static final String resume = "resume";
     }
 
     /**
@@ -72,7 +81,7 @@ public interface XmppSession {
      * 
      * @return The current state as enum
      */
-    public SessionState getSessionState();
+    public String getSessionState();
 
     /**
      * Answer if is logged in or not
@@ -162,11 +171,11 @@ public interface XmppSession {
      */
     public void setReady();
 
-    HandlerRegistration addIQHandler(IQHandler handler);
+    HandlerRegistration addIncomingIQHandler(IncomingIQHandler handler);
 
-    HandlerRegistration addMessageHandler(MessageHandler handler);
+    HandlerRegistration addIncomingMessageHandler(IncomingMessageHandler handler);
 
-    HandlerRegistration addPresenceHandler(PresenceHandler handler);
+    HandlerRegistration addIncomingPresenceHandler(IncomingPresenceHandler handler);
 
-    HandlerRegistration addSessionStateChangedHandler(StateChangedHandler handler);
+    HandlerRegistration addStateChangedHandler(StateChangedHandler handler);
 }

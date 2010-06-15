@@ -1,7 +1,7 @@
 package com.calclab.emite.xep.storage.client;
 
 import com.calclab.emite.core.client.packet.IPacket;
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Listener;
@@ -13,7 +13,7 @@ import com.calclab.suco.client.events.Listener;
  */
 public class AbstractIQManager {
 
-    protected final Session session;
+    protected final XmppSession session;
 
     protected final String xmlns;
 
@@ -29,10 +29,19 @@ public class AbstractIQManager {
      * @param session
      *            the session
      */
-    public AbstractIQManager(final String xmlns, final String idPrefix, final Session session) {
+    public AbstractIQManager(final String xmlns, final String idPrefix, final XmppSession session) {
 	this.xmlns = xmlns;
 	this.idPrefix = idPrefix;
 	this.session = session;
+    }
+
+    private void setFromTo(final XmppURI from, final XmppURI to, final IQ iq) {
+	if (from != null) {
+	    iq.setFrom(from);
+	}
+	if (to != null) {
+	    iq.setTo(to);
+	}
     }
 
     /**
@@ -126,14 +135,5 @@ public class AbstractIQManager {
 		handleResponse(parameter, listener);
 	    }
 	});
-    }
-
-    private void setFromTo(final XmppURI from, final XmppURI to, final IQ iq) {
-	if (from != null) {
-	    iq.setFrom(from);
-	}
-	if (to != null) {
-	    iq.setTo(to);
-	}
     }
 }

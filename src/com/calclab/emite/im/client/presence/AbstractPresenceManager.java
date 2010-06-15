@@ -1,15 +1,21 @@
 package com.calclab.emite.im.client.presence;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
-import com.calclab.suco.client.events.Event;
 import com.calclab.suco.client.events.Listener;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 public abstract class AbstractPresenceManager implements PresenceManager {
     private Presence ownPresence;
-    private final Event<Presence> onOwnPresenceChanged;
+    protected final EmiteEventBus eventBus;
 
-    public AbstractPresenceManager() {
-	this.onOwnPresenceChanged = new Event<Presence>("presenceManager:onOwnPresenceChanged");
+    public AbstractPresenceManager(final EmiteEventBus eventBus) {
+	this.eventBus = eventBus;
+    }
+
+    @Override
+    public HandlerRegistration addOwnPresenceChangedHandler(final OwnPresenceChangedHandler handler) {
+	return eventBus.addHandler(OwnPresenceChangedEvent.getType(), handler);
     }
 
     /**
@@ -23,12 +29,17 @@ public abstract class AbstractPresenceManager implements PresenceManager {
     }
 
     public void onOwnPresenceChanged(final Listener<Presence> listener) {
-	onOwnPresenceChanged.add(listener);
+	addOwnPresenceChangedHandler(new OwnPresenceChangedHandler() {
+	    @Override
+	    public void onOwnPresenceChanged(final OwnPresenceChangedEvent event) {
+		listener.onEvent(event.getPresence());
+	    }
+	});
     }
 
-    public void setOwnPresence(Presence presence) {
+    public void setOwnPresence(final Presence presence) {
 	ownPresence = presence;
-	onOwnPresenceChanged.fire(ownPresence);
+	eventBus.fireEvent(new OwnPresenceChangedEvent(presence));
     }
 
 }

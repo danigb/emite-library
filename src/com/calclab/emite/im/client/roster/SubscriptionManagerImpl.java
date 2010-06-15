@@ -24,7 +24,9 @@ package com.calclab.emite.im.client.roster;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.IncomingPresenceEvent;
+import com.calclab.emite.core.client.xmpp.session.IncomingPresenceHandler;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence.Type;
@@ -38,20 +40,24 @@ import com.calclab.suco.client.events.Listener2;
 public class SubscriptionManagerImpl implements SubscriptionManager {
     protected static final PacketMatcher FILTER_NICK = MatcherFactory.byNameAndXMLNS("nick",
 	    "http://jabber.org/protocol/nick");
-    private final Session session;
+    private final XmppSession session;
     private final Event2<XmppURI, String> onSubscriptionRequested;
     private final Roster roster;
 
-    public SubscriptionManagerImpl(final Session session, final Roster roster) {
+    public SubscriptionManagerImpl(final XmppSession session, final Roster roster) {
 	this.session = session;
 	this.roster = roster;
-	this.onSubscriptionRequested = new Event2<XmppURI, String>("subscriptionManager:onSubscriptionRequested");
+	onSubscriptionRequested = new Event2<XmppURI, String>("subscriptionManager:onSubscriptionRequested");
 
-	session.onPresence(new Listener<Presence>() {
-	    public void onEvent(final Presence presence) {
-		if (presence.getType() == Type.subscribe) {
-		    final IPacket nick = presence.getFirstChild(FILTER_NICK);
-		    onSubscriptionRequested.fire(presence.getFrom(), nick.getText());
+	session.addIncomingPresenceHandler(new IncomingPresenceHandler() {
+	    @Override
+	    public void onIncomingPresence(final IncomingPresenceEvent event) {
+		final Presence presence = event.getPresence();
+		{
+		    if (presence.getType() == Type.subscribe) {
+			final IPacket nick = presence.getFirstChild(FILTER_NICK);
+			onSubscriptionRequested.fire(presence.getFrom(), nick.getText());
+		    }
 		}
 	    }
 	});

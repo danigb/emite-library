@@ -4,7 +4,6 @@ import static com.calclab.emite.core.client.xmpp.stanzas.XmppURI.uri;
 
 import com.calclab.emite.browser.client.PageAssist;
 import com.calclab.emite.core.client.xmpp.session.Session;
-import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.im.client.chat.Chat;
 import com.calclab.emite.im.client.chat.ChatManager;
@@ -29,7 +28,7 @@ public class ExampleIMChat implements EntryPoint {
 	createUI();
 
 	log("Example IM Chat");
-	String self = PageAssist.getMeta("emite.user");
+	final String self = PageAssist.getMeta("emite.user");
 	log("Current user: " + self);
 	final String user = PageAssist.getMeta("emite.chat");
 	log("Chat with user: " + user);
@@ -37,8 +36,8 @@ public class ExampleIMChat implements EntryPoint {
 	final Session session = Suco.get(Session.class);
 	session.onStateChanged(new Listener<Session>() {
 	    @Override
-	    public void onEvent(Session session) {
-		XmppSession.SessionState state = session.getSessionState();
+	    public void onEvent(final Session session) {
+		final String state = session.getSessionState();
 		log("Current state: " + state);
 	    }
 	});
@@ -46,19 +45,19 @@ public class ExampleIMChat implements EntryPoint {
 	final ChatManager chatManager = Suco.get(ChatManager.class);
 	input.addChangeHandler(new ChangeHandler() {
 	    @Override
-	    public void onChange(ChangeEvent event) {
-		String msg = input.getText();
+	    public void onChange(final ChangeEvent event) {
+		final String msg = input.getText();
 		log("Message sent: " + msg);
-		Chat chat = chatManager.open(uri(user));
+		final Chat chat = chatManager.open(uri(user));
 		chat.send(new Message(msg));
 		input.setText("");
 	    }
 	});
 
-	Chat chat = chatManager.open(uri(user));
+	final Chat chat = chatManager.open(uri(user));
 	chat.onMessageReceived(new Listener<Message>() {
 	    @Override
-	    public void onEvent(Message msg) {
+	    public void onEvent(final Message msg) {
 		log("Message received: " + msg.getBody());
 	    }
 	});
@@ -66,7 +65,7 @@ public class ExampleIMChat implements EntryPoint {
     }
 
     private void createUI() {
-	DockPanel dock = new DockPanel();
+	final DockPanel dock = new DockPanel();
 	input = new TextBox();
 	dock.add(input, DockPanel.SOUTH);
 	output = new VerticalPanel();
@@ -74,7 +73,7 @@ public class ExampleIMChat implements EntryPoint {
 	RootPanel.get("app").add(dock);
     }
 
-    private void log(String text) {
+    private void log(final String text) {
 	output.add(new Label(text));
     }
 

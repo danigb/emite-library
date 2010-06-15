@@ -4,7 +4,6 @@ import static com.calclab.emite.core.client.xmpp.stanzas.XmppURI.uri;
 
 import com.calclab.emite.browser.client.PageAssist;
 import com.calclab.emite.core.client.xmpp.session.Session;
-import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.im.client.chat.Chat;
 import com.calclab.emite.im.client.chat.ChatManager;
@@ -25,7 +24,7 @@ public class ExampleEcho implements EntryPoint {
 	RootPanel.get("app").add(output);
 
 	log("Example echo chat");
-	String self = PageAssist.getMeta("emite.user");
+	final String self = PageAssist.getMeta("emite.user");
 	log("Current user: " + self);
 	final String user = PageAssist.getMeta("emite.chat");
 	log("Chat with user: " + user);
@@ -33,18 +32,18 @@ public class ExampleEcho implements EntryPoint {
 	final Session session = Suco.get(Session.class);
 	session.onStateChanged(new Listener<Session>() {
 	    @Override
-	    public void onEvent(Session session) {
-		XmppSession.SessionState state = session.getSessionState();
+	    public void onEvent(final Session session) {
+		final String state = session.getSessionState();
 		log("Current state: " + state);
 	    }
 	});
 
-	ChatManager chatManager = Suco.get(ChatManager.class);
+	final ChatManager chatManager = Suco.get(ChatManager.class);
 	final Chat chat = chatManager.open(uri(user));
 	chat.onMessageReceived(new Listener<Message>() {
 	    @Override
-	    public void onEvent(Message msg) {
-		String body = msg.getBody();
+	    public void onEvent(final Message msg) {
+		final String body = msg.getBody();
 		log("Message received: " + body);
 		chat.send(new Message(body + " at: " + System.currentTimeMillis()));
 	    }
@@ -52,7 +51,7 @@ public class ExampleEcho implements EntryPoint {
 
     }
 
-    private void log(String text) {
+    private void log(final String text) {
 	output.add(new Label(text));
     }
 

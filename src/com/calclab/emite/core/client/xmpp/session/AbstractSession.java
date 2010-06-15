@@ -21,7 +21,9 @@
  */
 package com.calclab.emite.core.client.xmpp.session;
 
-import com.calclab.emite.core.client.bus.EmiteEventBus;
+import com.calclab.emite.core.client.events.EmiteEventBus;
+import com.calclab.emite.core.client.events.StateChangedEvent;
+import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
@@ -40,7 +42,7 @@ public abstract class AbstractSession extends AbstractXmppSession implements Ses
     }
 
     @Override
-    public HandlerRegistration addSessionStateChangedHandler(final StateChangedHandler handler) {
+    public HandlerRegistration addStateChangedHandler(final StateChangedHandler handler) {
 	return eventBus.addHandler(StateChangedEvent.getType(), handler);
     }
 
@@ -50,34 +52,34 @@ public abstract class AbstractSession extends AbstractXmppSession implements Ses
 
     @Override
     public void onIQ(final Listener<IQ> listener) {
-	addIQHandler(new IQHandler() {
+	addIncomingIQHandler(new IncomingIQHandler() {
 	    @Override
-	    public void onIQ(final IQEvent event) {
+	    public void onIQ(final IncomingIQEvent event) {
 		listener.onEvent(event.getIQ());
 	    }
 	});
     }
 
     public void onMessage(final Listener<Message> listener) {
-	addMessageHandler(new MessageHandler() {
+	addIncomingMessageHandler(new IncomingMessageHandler() {
 	    @Override
-	    public void onMessage(final MessageEvent event) {
+	    public void onIncomingMessage(final IncomingMessageEvent event) {
 		listener.onEvent(event.getMessage());
 	    }
 	});
     }
 
     public void onPresence(final Listener<Presence> listener) {
-	addPresenceHandler(new PresenceHandler() {
+	addIncomingPresenceHandler(new IncomingPresenceHandler() {
 	    @Override
-	    public void onPresence(final PresenceEvent event) {
+	    public void onIncomingPresence(final IncomingPresenceEvent event) {
 		listener.onEvent(event.getPresence());
 	    }
 	});
     }
 
     public void onStateChanged(final Listener<Session> listener) {
-	addSessionStateChangedHandler(new StateChangedHandler() {
+	addStateChangedHandler(new StateChangedHandler() {
 	    @Override
 	    public void onStateChanged(final StateChangedEvent event) {
 		listener.onEvent(AbstractSession.this);
@@ -86,15 +88,15 @@ public abstract class AbstractSession extends AbstractXmppSession implements Ses
     }
 
     protected void fireIQ(final IQ iq) {
-	eventBus.fireEvent(new IQEvent(iq));
+	eventBus.fireEvent(new IncomingIQEvent(iq));
     }
 
     protected void fireMessage(final Message message) {
-	eventBus.fireEvent(new MessageEvent(message));
+	eventBus.fireEvent(new IncomingMessageEvent(message));
     }
 
     protected void firePresence(final Presence presence) {
-	eventBus.fireEvent(new PresenceEvent(presence));
+	eventBus.fireEvent(new IncomingPresenceEvent(presence));
     }
 
 }

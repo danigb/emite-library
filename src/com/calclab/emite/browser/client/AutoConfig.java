@@ -22,7 +22,7 @@
 package com.calclab.emite.browser.client;
 
 import com.calclab.emite.core.client.conn.XmppConnection;
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
@@ -52,10 +52,10 @@ public class AutoConfig {
     protected static final String LOGOUT = "logout";
 
     private final XmppConnection connection;
-    private final Session session;
+    private final XmppSession session;
 
     @Inject
-    public AutoConfig(final XmppConnection connection, final Session session) {
+    public AutoConfig(final XmppConnection connection, final XmppSession session) {
 	this.connection = connection;
 	this.session = session;
 	initialize();

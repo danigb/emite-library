@@ -2,9 +2,9 @@ package com.calclab.emite.core.client.bosh;
 
 import java.util.List;
 
-import com.calclab.emite.core.client.bus.EmiteEventBus;
 import com.calclab.emite.core.client.conn.AbstractXmppConnection;
 import com.calclab.emite.core.client.conn.ConnectionSettings;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.Packet;
 import com.calclab.emite.core.client.services.ConnectorCallback;

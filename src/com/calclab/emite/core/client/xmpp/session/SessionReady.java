@@ -21,8 +21,9 @@
  */
 package com.calclab.emite.core.client.xmpp.session;
 
+import com.calclab.emite.core.client.events.StateChangedEvent;
+import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
-import com.calclab.suco.client.events.Listener;
 import com.google.gwt.core.client.GWT;
 
 /**
@@ -31,11 +32,11 @@ import com.google.gwt.core.client.GWT;
  */
 public class SessionReady {
 
-    public SessionReady(final Session session) {
+    public SessionReady(final XmppSession session) {
 
-	session.onStateChanged(new Listener<Session>() {
+	session.addStateChangedHandler(new StateChangedHandler() {
 	    @Override
-	    public void onEvent(final Session session) {
+	    public void onStateChanged(final StateChangedEvent event) {
 		GWT.log("SESSION READY: no roster");
 		if (session.getSessionState() == XmppSession.SessionState.loggedIn) {
 		    session.send(new Presence());

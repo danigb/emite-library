@@ -31,7 +31,7 @@ public class PresenceManagerTest {
     public void beforeTest() {
 	session = new SessionTester();
 	roster = mock(Roster.class);
-	manager = new PresenceManagerImpl(session, roster);
+	manager = new PresenceManagerImpl(session.getEventBus(), session, roster);
     }
 
     @Test

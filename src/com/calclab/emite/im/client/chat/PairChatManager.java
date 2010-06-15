@@ -21,14 +21,16 @@
  */
 package com.calclab.emite.im.client.chat;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.NoPacket;
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.IncomingMessageEvent;
+import com.calclab.emite.core.client.xmpp.session.IncomingMessageHandler;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.Message.Type;
 import com.calclab.emite.im.client.chat.Chat.State;
-import com.calclab.suco.client.events.Listener;
 
 /**
  * Default ChatManager implementation. Use ChatManager interface instead
@@ -36,11 +38,13 @@ import com.calclab.suco.client.events.Listener;
  * @see ChatManager
  */
 public class PairChatManager extends AbstractChatManager implements ChatManager {
-    public PairChatManager(final Session session) {
-	super(session);
-	session.onMessage(new Listener<Message>() {
-	    public void onEvent(final Message message) {
-		eventMessage(message);
+    public PairChatManager(final EmiteEventBus eventBus, final XmppSession session) {
+	super(eventBus, session);
+
+	session.addIncomingMessageHandler(new IncomingMessageHandler() {
+	    @Override
+	    public void onIncomingMessage(final IncomingMessageEvent event) {
+		eventMessage(event.getMessage());
 	    }
 	});
 

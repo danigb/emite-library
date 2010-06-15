@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.calclab.emite.core.client.bus.DefaultEmiteEventBus;
 import com.calclab.emite.core.client.conn.ConnectionSettings;
+import com.calclab.emite.core.client.events.DefaultEmiteEventBus;
 import com.calclab.emite.xtesting.ServicesTester;
 import com.calclab.emite.xtesting.matchers.IsPacketLike;
 

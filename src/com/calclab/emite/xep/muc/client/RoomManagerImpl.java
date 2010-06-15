@@ -23,11 +23,12 @@ package com.calclab.emite.xep.muc.client;
 
 import java.util.HashMap;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.NoPacket;
 import com.calclab.emite.core.client.packet.PacketMatcher;
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.BasicStanza;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Stanza;
@@ -47,8 +48,8 @@ public class RoomManagerImpl extends PairChatManager implements RoomManager {
     private final Event<RoomInvitation> onInvitationReceived;
     private HistoryOptions defaultHistoryOptions;
 
-    public RoomManagerImpl(final Session session) {
-	super(session);
+    public RoomManagerImpl(final EmiteEventBus eventBus, final XmppSession session) {
+	super(eventBus, session);
 	onInvitationReceived = new Event<RoomInvitation>("roomManager:onInvitationReceived");
 	roomsByJID = new HashMap<XmppURI, Room>();
 

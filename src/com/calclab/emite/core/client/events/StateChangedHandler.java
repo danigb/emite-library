@@ -1,4 +1,4 @@
-package com.calclab.emite.core.client.xmpp.session;
+package com.calclab.emite.core.client.events;
 
 import com.google.gwt.event.shared.EventHandler;
 

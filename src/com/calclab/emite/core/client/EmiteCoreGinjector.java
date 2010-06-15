@@ -1,7 +1,7 @@
 package com.calclab.emite.core.client;
 
 import com.calclab.emite.core.client.services.Services;
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.google.gwt.inject.client.GinModules;
 import com.google.gwt.inject.client.Ginjector;
 
@@ -9,5 +9,5 @@ import com.google.gwt.inject.client.Ginjector;
 public interface EmiteCoreGinjector extends Ginjector {
     Services getServices();
 
-    Session getSession();
+    XmppSession getSession();
 }
