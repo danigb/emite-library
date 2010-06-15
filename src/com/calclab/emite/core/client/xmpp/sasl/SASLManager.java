@@ -29,6 +29,7 @@ import com.calclab.emite.core.client.xmpp.session.Credentials;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Event;
 import com.calclab.suco.client.events.Listener;
+import com.google.inject.Inject;
 
 public class SASLManager {
     private static final String SEP = new String(new char[] { 0 });
@@ -45,6 +46,7 @@ public class SASLManager {
     private final Connection connection;
     private final DecoderRegistry decoders;
 
+    @Inject
     public SASLManager(final Connection connection, final DecoderRegistry decoders) {
 	this.connection = connection;
 	this.decoders = decoders;

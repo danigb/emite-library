@@ -27,6 +27,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Window;
+import com.google.inject.Inject;
 
 /**
  * This class object auto-configures some emite components and behaviours based
@@ -39,7 +40,7 @@ import com.google.gwt.user.client.Window;
  * 
  * More detailed information in BrowserModule's javadoc.
  * 
- * @see BrowserModule
+ * @see SucoBrowserModule
  * 
  */
 public class AutoConfig {
@@ -53,6 +54,7 @@ public class AutoConfig {
     private final Connection connection;
     private final Session session;
 
+    @Inject
     public AutoConfig(final Connection connection, final Session session) {
 	this.connection = connection;
 	this.session = session;

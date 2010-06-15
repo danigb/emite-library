@@ -27,6 +27,7 @@ import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Event;
 import com.calclab.suco.client.events.Listener;
+import com.google.inject.Inject;
 
 /**
  * Handle the IM session request.
@@ -37,9 +38,10 @@ public class IMSessionManager {
     private final Connection connection;
     private final Event<XmppURI> onSessionCreated;
 
+    @Inject
     public IMSessionManager(final Connection connection) {
 	this.connection = connection;
-	this.onSessionCreated = new Event<XmppURI>("sessionManager:onSessionCreated");
+	onSessionCreated = new Event<XmppURI>("sessionManager:onSessionCreated");
 
 	connection.onStanzaReceived(new Listener<IPacket>() {
 	    public void onEvent(final IPacket stanza) {

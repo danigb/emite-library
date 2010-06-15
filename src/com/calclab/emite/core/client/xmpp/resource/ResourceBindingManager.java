@@ -27,14 +27,16 @@ import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Event;
 import com.calclab.suco.client.events.Listener;
+import com.google.inject.Inject;
 
 public class ResourceBindingManager {
     private final Event<XmppURI> onBinded;
     private final Connection connection;
 
+    @Inject
     public ResourceBindingManager(final Connection connection) {
 	this.connection = connection;
-	this.onBinded = new Event<XmppURI>("resourceBindingManager:onBinded");
+	onBinded = new Event<XmppURI>("resourceBindingManager:onBinded");
 
 	connection.onStanzaReceived(new Listener<IPacket>() {
 	    public void onEvent(final IPacket received) {

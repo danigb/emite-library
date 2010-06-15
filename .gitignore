@@ -1,4 +1,5 @@
 .DS_Store
+war/suco/**
 war/examplexmppsession
 war/EmiteFunctionalTests/
 war/ExampleEcho/

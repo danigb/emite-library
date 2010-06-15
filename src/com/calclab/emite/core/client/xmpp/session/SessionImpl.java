@@ -35,6 +35,7 @@ import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Listener;
 import com.google.gwt.core.client.GWT;
+import com.google.inject.Inject;
 
 /**
  * Default Session implementation. Use Session interface instead.
@@ -46,6 +47,7 @@ public class SessionImpl extends AbstractSession implements Session {
     private final IQManager iqManager;
     private final ArrayList<IPacket> queuedStanzas;
 
+    @Inject
     public SessionImpl(final Connection connection, final SASLManager saslManager,
 	    final ResourceBindingManager bindingManager, final IMSessionManager iMSessionManager) {
 	this.connection = connection;

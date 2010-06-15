@@ -30,6 +30,7 @@ import com.calclab.emite.core.client.services.ConnectorException;
 import com.calclab.emite.core.client.services.ScheduledAction;
 import com.calclab.emite.core.client.services.Services;
 import com.google.gwt.core.client.GWT;
+import com.google.inject.Inject;
 
 public class BoshConnection extends AbstractConnection {
     private int activeConnections;
@@ -38,6 +39,7 @@ public class BoshConnection extends AbstractConnection {
     private boolean shouldCollectResponses;
     private final RetryControl retryControl = new RetryControl();
 
+    @Inject
     public BoshConnection(final Services services) {
 	this.services = services;
 
@@ -210,11 +212,11 @@ public class BoshConnection extends AbstractConnection {
 	if (userSettings.routeHost != null && userSettings.routePort != null) {
 	    String routeHost = userSettings.routeHost;
 	    if (routeHost == null) {
-	        routeHost = userSettings.hostName;
+		routeHost = userSettings.hostName;
 	    }
 	    Integer routePort = userSettings.routePort;
 	    if (routePort == null) {
-	        routePort = 5222;
+		routePort = 5222;
 	    }
 	    body.setAttribute("route", "xmpp:" + routeHost + ":" + routePort);
 	}
@@ -258,7 +260,7 @@ public class BoshConnection extends AbstractConnection {
 
     /**
      * Sends a new request (and count the activeConnections)
-     *
+     * 
      * @param request
      */
     private void send(final String request) {
