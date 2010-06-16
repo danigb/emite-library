@@ -21,10 +21,10 @@
  */
 package com.calclab.emite.im.client.chat;
 
+import com.calclab.emite.core.client.events.MessageEvent;
+import com.calclab.emite.core.client.events.MessageHandler;
 import com.calclab.emite.core.client.events.StateChangedEvent;
 import com.calclab.emite.core.client.events.StateChangedHandler;
-import com.calclab.emite.core.client.xmpp.session.IncomingMessageEvent;
-import com.calclab.emite.core.client.xmpp.session.IncomingMessageHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.session.XmppSession.SessionState;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
@@ -56,9 +56,9 @@ public class PairChat extends AbstractChat {
 
 	setStateFromSessionState(session);
 
-	session.addIncomingMessageHandler(new IncomingMessageHandler() {
+	session.addIncomingMessageHandler(new MessageHandler() {
 	    @Override
-	    public void onIncomingMessage(final IncomingMessageEvent event) {
+	    public void onPacketEvent(final MessageEvent event) {
 		final Message message = event.getMessage();
 		final XmppURI from = message.getFrom();
 		if (from.equalsNoResource(uri)) {

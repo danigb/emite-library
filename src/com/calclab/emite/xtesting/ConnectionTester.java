@@ -46,6 +46,10 @@ public class ConnectionTester extends AbstractConnection implements Connection {
 	isConnected = false;
     }
 
+    public EmiteEventBus getEventBus() {
+	return eventBus;
+    }
+
     public int getSentSize() {
 	return sent.size();
     }

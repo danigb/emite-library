@@ -22,10 +22,10 @@
 package com.calclab.emite.im.client.chat;
 
 import com.calclab.emite.core.client.events.EmiteEventBus;
+import com.calclab.emite.core.client.events.MessageEvent;
+import com.calclab.emite.core.client.events.MessageHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.NoPacket;
-import com.calclab.emite.core.client.xmpp.session.IncomingMessageEvent;
-import com.calclab.emite.core.client.xmpp.session.IncomingMessageHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
@@ -41,9 +41,9 @@ public class PairChatManager extends AbstractChatManager implements ChatManager 
     public PairChatManager(final EmiteEventBus eventBus, final XmppSession session) {
 	super(eventBus, session);
 
-	session.addIncomingMessageHandler(new IncomingMessageHandler() {
+	session.addIncomingMessageHandler(new MessageHandler() {
 	    @Override
-	    public void onIncomingMessage(final IncomingMessageEvent event) {
+	    public void onPacketEvent(final MessageEvent event) {
 		eventMessage(event.getMessage());
 	    }
 	});

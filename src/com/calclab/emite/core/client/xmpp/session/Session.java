@@ -24,7 +24,6 @@ package com.calclab.emite.core.client.xmpp.session;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
-import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Listener;
 
 /**
@@ -33,21 +32,6 @@ import com.calclab.suco.client.events.Listener;
  */
 @Deprecated
 public interface Session extends XmppSession {
-
-    /**
-     * <p>
-     * Start a login process with the current xmpp uri and password. It uses the
-     * login(credentials) method with not encoded password.
-     * </p>
-     * 
-     * @param uri
-     *            the user's uri to loggin
-     * @param password
-     *            the user's password (plain)
-     * 
-     * @see login
-     */
-    public abstract void login(final XmppURI uri, final String password);
 
     /**
      * The given listener is called when a IQ <b>of type 'get' or 'set'</b> is

@@ -21,11 +21,11 @@
  */
 package com.calclab.emite.im.client.roster;
 
+import com.calclab.emite.core.client.events.PresenceEvent;
+import com.calclab.emite.core.client.events.PresenceHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
-import com.calclab.emite.core.client.xmpp.session.IncomingPresenceEvent;
-import com.calclab.emite.core.client.xmpp.session.IncomingPresenceHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
@@ -49,9 +49,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 	this.roster = roster;
 	onSubscriptionRequested = new Event2<XmppURI, String>("subscriptionManager:onSubscriptionRequested");
 
-	session.addIncomingPresenceHandler(new IncomingPresenceHandler() {
+	session.addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final IncomingPresenceEvent event) {
+	    public void onIncomingPresence(final PresenceEvent event) {
 		final Presence presence = event.getPresence();
 		{
 		    if (presence.getType() == Type.subscribe) {

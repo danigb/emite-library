@@ -22,7 +22,6 @@
 package com.calclab.emite.suco.client;
 
 import com.calclab.emite.core.client.bosh.XmppBoshConnection;
-import com.calclab.emite.core.client.conn.Connection;
 import com.calclab.emite.core.client.conn.XmppConnection;
 import com.calclab.emite.core.client.events.DefaultEmiteEventBus;
 import com.calclab.emite.core.client.events.EmiteEventBus;
@@ -32,10 +31,10 @@ import com.calclab.emite.core.client.xmpp.datetime.XmppDateTime;
 import com.calclab.emite.core.client.xmpp.resource.ResourceBindingManager;
 import com.calclab.emite.core.client.xmpp.sasl.DecoderRegistry;
 import com.calclab.emite.core.client.xmpp.sasl.SASLManager;
-import com.calclab.emite.core.client.xmpp.session.DefaultXmppSession;
 import com.calclab.emite.core.client.xmpp.session.IMSessionManager;
 import com.calclab.emite.core.client.xmpp.session.Session;
 import com.calclab.emite.core.client.xmpp.session.SessionComponent;
+import com.calclab.emite.core.client.xmpp.session.SessionImpl;
 import com.calclab.emite.core.client.xmpp.session.SessionReady;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.suco.client.Suco;
@@ -74,14 +73,13 @@ public class SucoEmiteCoreModule extends AbstractModule implements EntryPoint {
 	}, new Factory<IMSessionManager>(IMSessionManager.class) {
 	    @Override
 	    public IMSessionManager create() {
-		return new IMSessionManager($(XmppConnection.class));
+		return new IMSessionManager($(EmiteEventBus.class), $(XmppConnection.class));
 	    }
 	}, new Factory<Session>(Session.class) {
 	    @Override
 	    public Session create() {
 		GWT.log("SESSION CREATED!");
-		final DefaultXmppSession session = new DefaultXmppSession($(EmiteEventBus.class), $(Connection.class),
-			$(SASLManager.class), $(ResourceBindingManager.class), $(IMSessionManager.class));
+		final SessionImpl session = new SessionImpl($(EmiteEventBus.class), $(XmppSession.class));
 		return session;
 	    }
 
@@ -93,7 +91,7 @@ public class SucoEmiteCoreModule extends AbstractModule implements EntryPoint {
 	}, new Factory<ResourceBindingManager>(ResourceBindingManager.class) {
 	    @Override
 	    public ResourceBindingManager create() {
-		return new ResourceBindingManager($(XmppConnection.class));
+		return new ResourceBindingManager($(EmiteEventBus.class), $(XmppConnection.class));
 	    }
 	}, new Factory<DecoderRegistry>(DecoderRegistry.class) {
 	    @Override

@@ -24,21 +24,18 @@ package com.calclab.emite.core.client.xmpp.resource;
 import com.calclab.emite.core.client.conn.StanzaReceivedEvent;
 import com.calclab.emite.core.client.conn.StanzaReceivedHandler;
 import com.calclab.emite.core.client.conn.XmppConnection;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
-import com.calclab.suco.client.events.Event;
-import com.calclab.suco.client.events.Listener;
 import com.google.inject.Inject;
 
 public class ResourceBindingManager {
-    private final Event<XmppURI> onBinded;
     private final XmppConnection connection;
 
     @Inject
-    public ResourceBindingManager(final XmppConnection connection) {
+    public ResourceBindingManager(final EmiteEventBus eventBus, final XmppConnection connection) {
 	this.connection = connection;
-	onBinded = new Event<XmppURI>("resourceBindingManager:onBinded");
 
 	connection.addStanzaReceivedHandler(new StanzaReceivedHandler() {
 	    @Override
@@ -46,7 +43,7 @@ public class ResourceBindingManager {
 		final IPacket received = event.getStanza();
 		if ("bind-resource".equals(received.getAttribute("id"))) {
 		    final String jid = received.getFirstChild("bind").getFirstChild("jid").getText();
-		    onBinded.fire(XmppURI.uri(jid));
+		    eventBus.fireEvent(new ResourceBindResultEvent(XmppURI.uri(jid)));
 		}
 	    }
 	});
@@ -59,10 +56,6 @@ public class ResourceBindingManager {
 	iq.addChild("bind", "urn:ietf:params:xml:ns:xmpp-bind").addChild("resource", null).setText(resource);
 
 	connection.send(iq);
-    }
-
-    public void onBinded(final Listener<XmppURI> listener) {
-	onBinded.add(listener);
     }
 
 }

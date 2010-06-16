@@ -32,9 +32,11 @@ import com.calclab.emite.core.client.conn.XmppConnection;
 import com.calclab.emite.core.client.conn.ConnectionEvent.EventType;
 import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
+import com.calclab.emite.core.client.xmpp.resource.ResourceBindResultEvent;
+import com.calclab.emite.core.client.xmpp.resource.ResourceBindResultHandler;
 import com.calclab.emite.core.client.xmpp.resource.ResourceBindingManager;
-import com.calclab.emite.core.client.xmpp.sasl.AuthorizationEvent;
-import com.calclab.emite.core.client.xmpp.sasl.AuthorizationHandler;
+import com.calclab.emite.core.client.xmpp.sasl.AuthorizationResultEvent;
+import com.calclab.emite.core.client.xmpp.sasl.AuthorizationResultHandler;
 import com.calclab.emite.core.client.xmpp.sasl.SASLManager;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
@@ -47,7 +49,7 @@ import com.google.inject.Inject;
 /**
  * Default Session implementation. Use Session interface instead.
  */
-public class DefaultXmppSession extends AbstractSession implements Session {
+public class DefaultXmppSession extends AbstractXmppSession {
     private XmppURI userURI;
     private final XmppConnection connection;
     private final IQManager iqManager;
@@ -98,35 +100,37 @@ public class DefaultXmppSession extends AbstractSession implements Session {
 	    }
 	});
 
-	eventBus.addHandler(AuthorizationEvent.getType(), new AuthorizationHandler() {
+	eventBus.addHandler(AuthorizationResultEvent.getType(), new AuthorizationResultHandler() {
 	    @Override
-	    public void onAuthorization(final AuthorizationEvent event) {
+	    public void onAuthorization(final AuthorizationResultEvent event) {
 		if (event.isSucceed()) {
-		    setSessionState(XmppSession.SessionState.authorized);
+		    setSessionState(SessionState.authorized);
 		    connection.restartStream();
 		    bindingManager.bindResource(event.getXmppUri().getResource());
 		} else {
-		    setSessionState(XmppSession.SessionState.notAuthorized);
+		    setSessionState(SessionState.notAuthorized);
 		    disconnect();
-
 		}
-
 	    }
 	});
 
-	bindingManager.onBinded(new Listener<XmppURI>() {
-	    public void onEvent(final XmppURI uri) {
-		iMSessionManager.requestSession(uri);
+	eventBus.addHandler(ResourceBindResultEvent.getType(), new ResourceBindResultHandler() {
+	    @Override
+	    public void onBinded(final ResourceBindResultEvent event) {
+		iMSessionManager.requestSession(event.getXmppUri());
 	    }
 	});
 
-	iMSessionManager.onSessionCreated(new Listener<XmppURI>() {
-	    public void onEvent(final XmppURI uri) {
-		setLoggedIn(uri);
+	eventBus.addHandler(SessionRequestResultEvent.getType(), new SessionRequestResultHandler() {
+	    @Override
+	    public void onSessionRequestResult(final SessionRequestResultEvent event) {
+		if (event.isSucceed()) {
+		    setLoggedIn(event.getUri());
+		} else {
+		    disconnect();
+		}
 	    }
-
 	});
-
     }
 
     public XmppURI getCurrentUser() {

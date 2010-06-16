@@ -6,8 +6,8 @@ import com.calclab.emite.core.client.conn.XmppConnection;
 import com.calclab.emite.core.client.conn.ConnectionEvent.EventType;
 import com.calclab.emite.core.client.events.StateChangedEvent;
 import com.calclab.emite.core.client.events.StateChangedHandler;
-import com.calclab.emite.core.client.xmpp.sasl.AuthorizationEvent;
-import com.calclab.emite.core.client.xmpp.sasl.AuthorizationHandler;
+import com.calclab.emite.core.client.xmpp.sasl.AuthorizationResultEvent;
+import com.calclab.emite.core.client.xmpp.sasl.AuthorizationResultHandler;
 import com.calclab.emite.core.client.xmpp.sasl.SASLManager;
 import com.calclab.emite.core.client.xmpp.session.Credentials;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
@@ -24,9 +24,9 @@ public class SessionReconnect {
 	reconnectionAttempts = 0;
 	GWT.log("RECONNECT BEHAVIOUR");
 
-	saslManager.addAuthorizationHandler(new AuthorizationHandler() {
+	saslManager.addAuthorizationHandler(new AuthorizationResultHandler() {
 	    @Override
-	    public void onAuthorization(final AuthorizationEvent event) {
+	    public void onAuthorization(final AuthorizationResultEvent event) {
 		if (event.isSucceed()) {
 		    lastSuccessfulCredentials = event.getCredentials();
 		}

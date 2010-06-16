@@ -26,14 +26,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.calclab.emite.core.client.events.PresenceEvent;
+import com.calclab.emite.core.client.events.PresenceHandler;
 import com.calclab.emite.core.client.events.StateChangedEvent;
 import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
 import com.calclab.emite.core.client.xmpp.datetime.XmppDateTime;
-import com.calclab.emite.core.client.xmpp.session.IncomingPresenceEvent;
-import com.calclab.emite.core.client.xmpp.session.IncomingPresenceHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.BasicStanza;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
@@ -88,9 +88,9 @@ public class Room extends AbstractChat implements Chat {
 
 	// @see http://www.xmpp.org/extensions/xep-0045.html#createroom
 
-	session.addIncomingPresenceHandler(new IncomingPresenceHandler() {
+	session.addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final IncomingPresenceEvent event) {
+	    public void onIncomingPresence(final PresenceEvent event) {
 		final Presence presence = event.getPresence();
 		final XmppURI occupantURI = presence.getFrom();
 		if (roomURI.equalsNoResource(occupantURI)) {

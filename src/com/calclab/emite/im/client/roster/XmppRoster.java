@@ -24,15 +24,15 @@ package com.calclab.emite.im.client.roster;
 import java.util.Collection;
 import java.util.List;
 
+import com.calclab.emite.core.client.events.IQEvent;
+import com.calclab.emite.core.client.events.IQHandler;
+import com.calclab.emite.core.client.events.PresenceEvent;
+import com.calclab.emite.core.client.events.PresenceHandler;
 import com.calclab.emite.core.client.events.StateChangedEvent;
 import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
-import com.calclab.emite.core.client.xmpp.session.IncomingIQEvent;
-import com.calclab.emite.core.client.xmpp.session.IncomingIQHandler;
-import com.calclab.emite.core.client.xmpp.session.IncomingPresenceEvent;
-import com.calclab.emite.core.client.xmpp.session.IncomingPresenceHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
@@ -65,9 +65,9 @@ public class XmppRoster extends AbstractRoster implements Roster {
 	    }
 	});
 
-	session.addIncomingPresenceHandler(new IncomingPresenceHandler() {
+	session.addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final IncomingPresenceEvent event) {
+	    public void onIncomingPresence(final PresenceEvent event) {
 		final Presence presence = event.getPresence();
 		final RosterItem item = getItemByJID(presence.getFrom());
 		if (item != null) {
@@ -89,9 +89,9 @@ public class XmppRoster extends AbstractRoster implements Roster {
 	    }
 	});
 
-	session.addIncomingIQHandler(new IncomingIQHandler() {
+	session.addIncomingIQHandler(new IQHandler() {
 	    @Override
-	    public void onIQ(IncomingIQEvent event) {
+	    public void onPacket(IQEvent event) {
 		IQ iq = event.getIQ();
 		if (iq.isType(IQ.Type.set)) {
 		    final IPacket query = iq.getFirstChild(ROSTER_QUERY_FILTER);

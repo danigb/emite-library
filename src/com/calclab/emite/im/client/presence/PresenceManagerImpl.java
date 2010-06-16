@@ -24,10 +24,10 @@ package com.calclab.emite.im.client.presence;
 import java.util.Collection;
 
 import com.calclab.emite.core.client.events.EmiteEventBus;
+import com.calclab.emite.core.client.events.PresenceEvent;
+import com.calclab.emite.core.client.events.PresenceHandler;
 import com.calclab.emite.core.client.events.StateChangedEvent;
 import com.calclab.emite.core.client.events.StateChangedHandler;
-import com.calclab.emite.core.client.xmpp.session.IncomingPresenceEvent;
-import com.calclab.emite.core.client.xmpp.session.IncomingPresenceHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.session.XmppSession.SessionState;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
@@ -64,9 +64,9 @@ public class PresenceManagerImpl extends AbstractPresenceManager {
 	    }
 	});
 
-	session.addIncomingPresenceHandler(new IncomingPresenceHandler() {
+	session.addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final IncomingPresenceEvent event) {
+	    public void onIncomingPresence(final PresenceEvent event) {
 		final Presence presence = event.getPresence();
 		final Type type = presence.getType();
 		if (type == Type.probe) {

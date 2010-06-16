@@ -4,10 +4,10 @@ import com.calclab.emite.core.client.xmpp.session.Credentials;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.google.gwt.event.shared.GwtEvent;
 
-public class AuthorizationEvent extends GwtEvent<AuthorizationHandler> {
-    private static final Type<AuthorizationHandler> TYPE = new Type<AuthorizationHandler>();
+public class AuthorizationResultEvent extends GwtEvent<AuthorizationResultHandler> {
+    private static final Type<AuthorizationResultHandler> TYPE = new Type<AuthorizationResultHandler>();
 
-    public static Type<AuthorizationHandler> getType() {
+    public static Type<AuthorizationResultHandler> getType() {
 	return TYPE;
     }
 
@@ -17,7 +17,7 @@ public class AuthorizationEvent extends GwtEvent<AuthorizationHandler> {
     /**
      * Build a failed authorization event
      */
-    public AuthorizationEvent() {
+    public AuthorizationResultEvent() {
 	this(false, null);
     }
 
@@ -27,17 +27,17 @@ public class AuthorizationEvent extends GwtEvent<AuthorizationHandler> {
      * @param uri
      *            the uri of the authorized user
      */
-    public AuthorizationEvent(final Credentials credentials) {
+    public AuthorizationResultEvent(final Credentials credentials) {
 	this(true, credentials);
     }
 
-    private AuthorizationEvent(final boolean succeed, final Credentials credentials) {
+    private AuthorizationResultEvent(final boolean succeed, final Credentials credentials) {
 	this.succeed = succeed;
 	this.credentials = credentials;
     }
 
     @Override
-    public Type<AuthorizationHandler> getAssociatedType() {
+    public Type<AuthorizationResultHandler> getAssociatedType() {
 	return TYPE;
     }
 
@@ -54,7 +54,7 @@ public class AuthorizationEvent extends GwtEvent<AuthorizationHandler> {
     }
 
     @Override
-    protected void dispatch(final AuthorizationHandler handler) {
+    protected void dispatch(final AuthorizationResultHandler handler) {
 	handler.onAuthorization(this);
     }
 

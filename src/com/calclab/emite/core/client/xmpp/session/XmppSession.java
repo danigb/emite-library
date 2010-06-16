@@ -1,6 +1,9 @@
 package com.calclab.emite.core.client.xmpp.session;
 
 import com.calclab.emite.core.client.bosh.StreamSettings;
+import com.calclab.emite.core.client.events.IQHandler;
+import com.calclab.emite.core.client.events.MessageHandler;
+import com.calclab.emite.core.client.events.PresenceHandler;
 import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
@@ -13,7 +16,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * receive stanzas. It also allows you to pause and resume the session.
  */
 public interface XmppSession {
-
     /**
      * Different session states. The different states paths are:
      * <ul>
@@ -104,6 +106,21 @@ public interface XmppSession {
     public abstract void login(Credentials credentials);
 
     /**
+     * <p>
+     * Start a login process with the current xmpp uri and password. It uses the
+     * login(credentials) method with not encoded password.
+     * </p>
+     * 
+     * @param uri
+     *            the user's uri to loggin
+     * @param password
+     *            the user's password (plain)
+     * 
+     * @see login
+     */
+    public abstract void login(final XmppURI uri, final String password);
+
+    /**
      * Start a logout process in the current session. Use obnLoggedOut to know
      * when you are really logged out.
      */
@@ -171,11 +188,11 @@ public interface XmppSession {
      */
     public void setReady();
 
-    HandlerRegistration addIncomingIQHandler(IncomingIQHandler handler);
+    HandlerRegistration addIncomingIQHandler(IQHandler handler);
 
-    HandlerRegistration addIncomingMessageHandler(IncomingMessageHandler handler);
+    HandlerRegistration addIncomingMessageHandler(MessageHandler handler);
 
-    HandlerRegistration addIncomingPresenceHandler(IncomingPresenceHandler handler);
+    HandlerRegistration addIncomingPresenceHandler(PresenceHandler handler);
 
     HandlerRegistration addStateChangedHandler(StateChangedHandler handler);
 }

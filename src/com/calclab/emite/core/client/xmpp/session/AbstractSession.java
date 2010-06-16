@@ -22,14 +22,18 @@
 package com.calclab.emite.core.client.xmpp.session;
 
 import com.calclab.emite.core.client.events.EmiteEventBus;
+import com.calclab.emite.core.client.events.IQEvent;
+import com.calclab.emite.core.client.events.IQHandler;
+import com.calclab.emite.core.client.events.MessageEvent;
+import com.calclab.emite.core.client.events.MessageHandler;
+import com.calclab.emite.core.client.events.PresenceEvent;
+import com.calclab.emite.core.client.events.PresenceHandler;
 import com.calclab.emite.core.client.events.StateChangedEvent;
 import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
-import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Listener;
-import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * Session event plumbing.
@@ -42,37 +46,29 @@ public abstract class AbstractSession extends AbstractXmppSession implements Ses
     }
 
     @Override
-    public HandlerRegistration addStateChangedHandler(final StateChangedHandler handler) {
-	return eventBus.addHandler(StateChangedEvent.getType(), handler);
-    }
-
-    public void login(final XmppURI uri, final String password) {
-	login(new Credentials(uri, password, Credentials.ENCODING_NONE));
-    }
-
-    @Override
     public void onIQ(final Listener<IQ> listener) {
-	addIncomingIQHandler(new IncomingIQHandler() {
+	addIncomingIQHandler(new IQHandler() {
 	    @Override
-	    public void onIQ(final IncomingIQEvent event) {
+	    public void onPacket(final IQEvent event) {
 		listener.onEvent(event.getIQ());
 	    }
 	});
     }
 
     public void onMessage(final Listener<Message> listener) {
-	addIncomingMessageHandler(new IncomingMessageHandler() {
+	addIncomingMessageHandler(new MessageHandler() {
 	    @Override
-	    public void onIncomingMessage(final IncomingMessageEvent event) {
+	    public void onPacketEvent(final MessageEvent event) {
 		listener.onEvent(event.getMessage());
 	    }
+
 	});
     }
 
     public void onPresence(final Listener<Presence> listener) {
-	addIncomingPresenceHandler(new IncomingPresenceHandler() {
+	addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final IncomingPresenceEvent event) {
+	    public void onIncomingPresence(final PresenceEvent event) {
 		listener.onEvent(event.getPresence());
 	    }
 	});
@@ -85,18 +81,6 @@ public abstract class AbstractSession extends AbstractXmppSession implements Ses
 		listener.onEvent(AbstractSession.this);
 	    }
 	});
-    }
-
-    protected void fireIQ(final IQ iq) {
-	eventBus.fireEvent(new IncomingIQEvent(iq));
-    }
-
-    protected void fireMessage(final Message message) {
-	eventBus.fireEvent(new IncomingMessageEvent(message));
-    }
-
-    protected void firePresence(final Presence presence) {
-	eventBus.fireEvent(new IncomingPresenceEvent(presence));
     }
 
 }

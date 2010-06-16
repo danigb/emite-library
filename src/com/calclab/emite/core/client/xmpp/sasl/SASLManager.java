@@ -48,8 +48,8 @@ public class SASLManager {
 	install();
     }
 
-    public HandlerRegistration addAuthorizationHandler(final AuthorizationHandler handler) {
-	return eventBus.addHandler(AuthorizationEvent.getType(), handler);
+    public HandlerRegistration addAuthorizationHandler(final AuthorizationResultHandler handler) {
+	return eventBus.addHandler(AuthorizationResultEvent.getType(), handler);
     }
 
     public void sendAuthorizationRequest(final Credentials credentials) {
@@ -95,9 +95,9 @@ public class SASLManager {
 		final IPacket stanza = event.getStanza();
 		final String name = stanza.getName();
 		if ("failure".equals(name)) { // & XMLNS
-		    eventBus.fireEvent(new AuthorizationEvent());
+		    eventBus.fireEvent(new AuthorizationResultEvent());
 		} else if ("success".equals(name)) {
-		    eventBus.fireEvent(new AuthorizationEvent(currentCredentials));
+		    eventBus.fireEvent(new AuthorizationResultEvent(currentCredentials));
 		}
 		currentCredentials = null;
 	    }

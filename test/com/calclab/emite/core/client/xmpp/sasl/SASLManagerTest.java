@@ -19,7 +19,7 @@ public class SASLManagerTest {
     private SASLManager manager;
     private ConnectionTester connection;
     private DefaultEmiteEventBus eventBus;
-    protected AuthorizationEvent authEvent;
+    protected AuthorizationResultEvent authEvent;
 
     @Before
     public void beforeTests() {
@@ -27,9 +27,9 @@ public class SASLManagerTest {
 	eventBus = new DefaultEmiteEventBus();
 	manager = new SASLManager(eventBus, connection, new DecoderRegistry());
 	authEvent = null;
-	eventBus.addHandler(AuthorizationEvent.getType(), new AuthorizationHandler() {
+	eventBus.addHandler(AuthorizationResultEvent.getType(), new AuthorizationResultHandler() {
 	    @Override
-	    public void onAuthorization(final AuthorizationEvent event) {
+	    public void onAuthorization(final AuthorizationResultEvent event) {
 		authEvent = event;
 	    }
 	});
