@@ -6,7 +6,7 @@ import com.calclab.emite.core.client.xmpp.stanzas.Message;
 
 public class MessageTestHandler extends TestHandler<MessageEvent> implements MessageHandler {
 
-    public Message getEventMessage() {
+    public Message getMessage() {
 	return hasEvent() ? event.getMessage() : null;
     }
 

@@ -42,9 +42,9 @@ public class ChatTest extends AbstractChatTest {
 	final StateChangedTestHandler handler = new StateChangedTestHandler();
 	pairChat.addStateChangedHandler(handler);
 	session.logout();
-	assertEquals(ChatState.locked, handler.getEventState());
+	assertEquals(ChatState.locked, handler.getState());
 	session.login(USER_URI, "");
-	assertEquals(ChatState.ready, handler.getEventState());
+	assertEquals(ChatState.ready, handler.getState());
     }
 
     @Test
@@ -61,7 +61,7 @@ public class ChatTest extends AbstractChatTest {
 	pairChat.addMessageReceivedHandler(handler);
 	session.receives(new Message(CHAT_URI, USER_URI, "the body"));
 	assertTrue("should receive messages", handler.hasEvent());
-	assertEquals("the body", handler.getEventMessage().getBody());
+	assertEquals("the body", handler.getMessage().getBody());
     }
 
     @Test

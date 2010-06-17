@@ -9,16 +9,18 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.calclab.emite.core.client.events.ChangedEvent.ChangeAction;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence.Show;
 import com.calclab.emite.im.client.chat.AbstractChat;
 import com.calclab.emite.im.client.chat.AbstractChatTest;
-import com.calclab.emite.im.client.chat.Chat;
-import com.calclab.emite.im.client.chat.Chat.State;
+import com.calclab.emite.im.client.chat.Chat.ChatState;
 import com.calclab.emite.xtesting.SessionTester;
-import com.calclab.suco.testing.events.MockedListener;
-import com.calclab.suco.testing.events.MockedListener2;
+import com.calclab.emite.xtesting.handlers.MessageTestHandler;
+import com.calclab.emite.xtesting.handlers.RoomOccupantsChangedTestHandler;
+import com.calclab.emite.xtesting.handlers.RoomSubjectChangedTestHandler;
+import com.calclab.emite.xtesting.handlers.StateChangedTestHandler;
 
 public class RoomTest extends AbstractChatTest {
 
@@ -42,11 +44,13 @@ public class RoomTest extends AbstractChatTest {
 
     @Test
     public void shouldAddOccupantAndFireListeners() {
-	final MockedListener<Occupant> listener = new MockedListener<Occupant>();
-	room.onOccupantAdded(listener);
+	final RoomOccupantsChangedTestHandler handler = new RoomOccupantsChangedTestHandler();
+	room.addRoomOccupantsChangedHandler(handler);
+
 	final XmppURI uri = uri("room@domain/name");
 	final Occupant occupant = room.setOccupantPresence(uri, "aff", "role", Show.unknown, null);
-	assertTrue(listener.isCalledOnce());
+	assertTrue(handler.isCalledOnce());
+	assertEquals(ChangeAction.ADDED, handler.getChangeType());
 	final Occupant result = room.getOccupantByURI(uri);
 	assertEquals(occupant, result);
     }
@@ -60,51 +64,55 @@ public class RoomTest extends AbstractChatTest {
 
     @Test
     public void shouldCreateInstantRooms() {
-	final MockedListener<State> stateChanged = new MockedListener<Chat.State>();
-	room.onStateChanged(stateChanged);
+	final StateChangedTestHandler handler = new StateChangedTestHandler();
+	room.addStateChangedHandler(handler);
 	openInstantRoom(roomURI);
-	assertTrue(stateChanged.isCalledOnce());
+	assertTrue(handler.isCalledOnce());
+	assertEquals(ChatState.ready, handler.getState());
     }
 
     @Test
     public void shouldExitAndLockTheRoomWhenLoggedOut() {
 	openInstantRoom(roomURI);
 	session.logout();
-	assertEquals(Chat.State.locked, room.getState());
+	assertEquals(ChatState.locked, room.getChatState());
 	session.verifySent("<presence to='room@domain/nick' type='unavailable'/>");
     }
 
     @Test
     public void shouldFireListenersWhenMessage() {
-	final MockedListener<Message> listener = new MockedListener<Message>();
-	room.onMessageReceived(listener);
+	final MessageTestHandler handler = new MessageTestHandler();
+	room.addMessageReceivedHandler(handler);
+
 	final Message message = new Message(uri("someone@domain/res"), uri("room@domain"), "message");
 	room.receive(message);
-	assertTrue(listener.isCalledWithEquals(message));
+	assertEquals(message, handler.getMessage());
     }
 
     @Test
     public void shouldFireListenersWhenSubjectChange() {
-	final MockedListener2<Occupant, String> subjectListener = new MockedListener2<Occupant, String>();
-	room.onSubjectChanged(subjectListener);
+	final RoomSubjectChangedTestHandler handler = new RoomSubjectChangedTestHandler();
+	room.addRoomSubjectChangedHandler(handler);
 
 	final XmppURI occupantURI = uri("someone@domain/res");
 	room.receive(new Message(occupantURI, uri("room@domain"), null).Subject("the subject"));
-	assertEquals(1, subjectListener.getCalledTimes());
+	assertTrue(handler.isCalledOnce());
 	final Occupant occupant = room.getOccupantByURI(occupantURI);
-	assertTrue(subjectListener.isCalledWithSame(occupant, "the subject"));
+	assertEquals("the subject", handler.getSubject());
+	assertSame(occupant, handler.getOccupant());
     }
 
     @Test
     public void shouldRemoveOccupant() {
-	final MockedListener<Occupant> occupantRemoved = new MockedListener<Occupant>();
-	room.onOccupantRemoved(occupantRemoved);
+	final RoomOccupantsChangedTestHandler handler = new RoomOccupantsChangedTestHandler();
+	room.addRoomOccupantsChangedHandler(handler);
+
 	final XmppURI uri = uri("room@domain/name");
 	room.setOccupantPresence(uri, "owner", "participant", Show.notSpecified, null);
 	assertEquals(1, room.getOccupantsCount());
 	room.removeOccupant(uri);
 	assertEquals(0, room.getOccupantsCount());
-	assertEquals(1, occupantRemoved.getCalledTimes());
+	assertEquals(ChangeAction.REMOVED, handler.getChangeType());
 	assertNull(room.getOccupantByURI(uri));
     }
 
@@ -123,12 +131,12 @@ public class RoomTest extends AbstractChatTest {
 
     @Test
     public void shouldUpdateOccupantAndFireListeners() {
-	final MockedListener<Occupant> listener = new MockedListener<Occupant>();
-	room.onOccupantModified(listener);
+	final RoomOccupantsChangedTestHandler handler = new RoomOccupantsChangedTestHandler();
+	room.addRoomOccupantsChangedHandler(handler);
 	final XmppURI uri = uri("room@domain/name");
 	final Occupant occupant = room.setOccupantPresence(uri, "owner", "participant", Show.notSpecified, null);
 	final Occupant occupant2 = room.setOccupantPresence(uri, "admin", "moderator", Show.notSpecified, null);
-	assertEquals(1, listener.getCalledTimes());
+	assertEquals(ChangeAction.MODIFIED, handler.getChangeType());
 	assertSame(occupant, occupant2);
     }
 

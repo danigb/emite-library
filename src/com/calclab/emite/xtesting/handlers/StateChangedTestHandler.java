@@ -4,7 +4,7 @@ import com.calclab.emite.core.client.events.StateChangedEvent;
 import com.calclab.emite.core.client.events.StateChangedHandler;
 
 public class StateChangedTestHandler extends TestHandler<StateChangedEvent> implements StateChangedHandler {
-    public String getEventState() {
+    public String getState() {
 	return hasEvent() ? event.getState() : null;
     }
 

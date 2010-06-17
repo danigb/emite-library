@@ -86,7 +86,7 @@ public class ChatManagerTest extends AbstractChatManagerTest {
 	final StateChangedTestHandler handler = new StateChangedTestHandler();
 	chat.addStateChangedHandler(handler);
 	session.logout();
-	assertEquals(ChatState.locked, handler.getEventState());
+	assertEquals(ChatState.locked, handler.getState());
     }
 
     @Test

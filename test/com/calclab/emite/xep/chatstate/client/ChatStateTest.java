@@ -38,7 +38,7 @@ public class ChatStateTest {
 	message.addChild("gone", ChatStateManager.XMLNS);
 	chatStateManager.onMessageReceived(pairChat, message);
 	assertTrue(handler.hasEvent());
-	assertEquals(ChatUserState.gone, handler.getEventState());
+	assertEquals(ChatUserState.gone, handler.getState());
     }
 
     @Test
@@ -46,7 +46,7 @@ public class ChatStateTest {
 	final Message message = new Message(MYSELF, OTHER, null);
 	message.addChild("composing", ChatStateManager.XMLNS);
 	chatStateManager.onMessageReceived(pairChat, message);
-	assertEquals(ChatUserState.composing, handler.getEventState());
+	assertEquals(ChatUserState.composing, handler.getState());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class ChatStateTest {
 	final Message message = new Message(MYSELF, OTHER, null);
 	message.addChild("cha:composing", ChatStateManager.XMLNS);
 	chatStateManager.onMessageReceived(pairChat, message);
-	assertEquals(ChatUserState.composing, handler.getEventState());
+	assertEquals(ChatUserState.composing, handler.getState());
     }
 
     @Test
@@ -62,7 +62,7 @@ public class ChatStateTest {
 	final Message message = new Message(MYSELF, OTHER.getJID(), null);
 	message.addChild("cha:composing", ChatStateManager.XMLNS);
 	chatStateManager.onMessageReceived(pairChat, message);
-	assertEquals(ChatUserState.composing, handler.getEventState());
+	assertEquals(ChatUserState.composing, handler.getState());
     }
 
 }

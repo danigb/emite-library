@@ -89,7 +89,7 @@ public class XmppSessionTests {
 	final StateChangedTestHandler handler = new StateChangedTestHandler();
 	session.addSessionStateChangedHandler(handler);
 	session.setSessionState(SessionState.ready);
-	assertSame(SessionState.ready, handler.getEventState());
+	assertSame(SessionState.ready, handler.getState());
     }
 
     @Test
@@ -114,7 +114,7 @@ public class XmppSessionTests {
 	final StateChangedTestHandler handler = new StateChangedTestHandler();
 	session.addSessionStateChangedHandler(handler);
 	eventBus.fireEvent(new SessionRequestResultEvent(uri("me@domain")));
-	assertSame(SessionState.loggedIn, handler.getEventState());
+	assertSame(SessionState.loggedIn, handler.getState());
     }
 
     @Test
