@@ -1,8 +1,6 @@
 package com.calclab.emite.im.client.roster;
 
 import static com.calclab.emite.core.client.xmpp.stanzas.XmppURI.uri;
-import static com.calclab.suco.testing.events.Eventito.anyListener;
-import static com.calclab.suco.testing.events.Eventito.fire;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -12,6 +10,7 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence.Type;
 import com.calclab.emite.xtesting.SessionTester;
@@ -22,26 +21,14 @@ public class SubscriptionManagerTests {
     private SessionTester session;
     private SubscriptionManager manager;
     private Roster roster;
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void addRosterStep1_shouldSendSubscriptionRequestOnNewRosterItem() {
-
-	// only NONE subscription
-	fire(new RosterItem(uri("name@domain"), SubscriptionState.both, "TheName", null)).when(roster).onItemAdded(
-		anyListener());
-	session.verifyNotSent("<presence />");
-
-	fire(new RosterItem(uri("name@domain"), SubscriptionState.none, "TheName", Type.subscribe)).when(roster)
-		.onItemAdded(anyListener());
-	session.verifySent("<presence from='user@local' to='name@domain' type='subscribe'/>");
-    }
+    private EmiteEventBus eventBus;
 
     @Before
     public void beforeTests() {
 	session = new SessionTester();
+	eventBus = session.getEventBus();
 	roster = mock(Roster.class);
-	manager = new SubscriptionManagerImpl(session.getEventBus(), session, roster);
+	manager = new SubscriptionManagerImpl(eventBus, session, roster);
 	session.login(uri("user@local"), "anything");
     }
 
@@ -73,6 +60,19 @@ public class SubscriptionManagerTests {
     @Test
     public void shouldSendSubscriptionRequest() {
 	manager.requestSubscribe(uri("name@domain/RESOURCE"));
+	session.verifySent("<presence from='user@local' to='name@domain' type='subscribe'/>");
+    }
+
+    @Test
+    public void shouldSendSubscriptionRequestOnNewRosterItem() {
+
+	// only NONE subscription
+	final RosterItem subscriptedItem = new RosterItem(uri("name@domain"), SubscriptionState.both, "TheName", null);
+	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_ADDED, subscriptedItem));
+	session.verifyNotSent("<presence />");
+
+	final RosterItem newItem = new RosterItem(uri("name@domain"), SubscriptionState.none, "TheName", Type.subscribe);
+	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_ADDED, newItem));
 	session.verifySent("<presence from='user@local' to='name@domain' type='subscribe'/>");
     }
 

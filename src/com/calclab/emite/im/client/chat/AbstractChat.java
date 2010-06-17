@@ -24,6 +24,7 @@ package com.calclab.emite.im.client.chat;
 import java.util.HashMap;
 
 import com.calclab.emite.core.client.events.DefaultEmiteEventBus;
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.events.MessageEvent;
 import com.calclab.emite.core.client.events.MessageHandler;
 import com.calclab.emite.core.client.events.MessageReceivedEvent;
@@ -77,6 +78,11 @@ public abstract class AbstractChat implements Chat {
     @Override
     public HandlerRegistration addStateChangedHandler(final StateChangedHandler handler) {
 	return eventBus.addHandler(ChatStateChangedEvent.getType(), handler);
+    }
+
+    @Override
+    public EmiteEventBus getChatEventBus() {
+	return eventBus;
     }
 
     @Override

@@ -21,6 +21,7 @@
  */
 package com.calclab.emite.im.client.chat;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.events.MessageHandler;
 import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
@@ -212,5 +213,12 @@ public interface Chat {
      * @return a handle registration object to remove this handler
      */
     HandlerRegistration addStateChangedHandler(StateChangedHandler handler);
+
+    /**
+     * Get the chat event bus
+     * 
+     * @return
+     */
+    EmiteEventBus getChatEventBus();
 
 }

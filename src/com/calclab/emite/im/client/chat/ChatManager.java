@@ -35,6 +35,46 @@ import com.google.gwt.event.shared.HandlerRegistration;
  */
 public interface ChatManager {
     /**
+     * Adds a chat changed handler to know wherever a Chat changes (it cab be
+     * created, opened or closed)
+     * 
+     * @param handler
+     *            the handler to be added
+     * @return a handle registration object to detach the given handler
+     */
+    public HandlerRegistration addChatChangedHandler(ChatChangedHandler handler);
+
+    /**
+     * Adds a chat changed handler to know wherever a Chat is closed
+     * 
+     * @param handler
+     *            the handler to be added
+     * @return a handle registration object to detach the given handler
+     */
+
+    public HandlerRegistration addChatClosedHandler(ChatChangedHandler handler);
+
+    /**
+     * Adds a chat changed handler to know wherever a Chat is created
+     * 
+     * @param handler
+     *            the handler to be added
+     * @return a handle registration object to detach the given handler
+     */
+
+    public HandlerRegistration addChatCreatedHandler(ChatChangedHandler handler);
+
+    /**
+     * Adds a chat changed handler to know wherever a Chat is opened
+     * 
+     * @param handler
+     *            the handler to be added
+     * @return a handle registration object to detach the given handler
+     */
+
+    public HandlerRegistration addChatOpenedHandler(ChatChangedHandler handler);
+
+    /**
      * Close the given conversation. If a conversation is closed, a new
      * onChatCreated event will be throw when opened
      * 
@@ -48,25 +88,31 @@ public interface ChatManager {
      * Event sent when the chat is closed (two reasons: the user closed the chat
      * or the session disconnected)
      * 
+     * @see addChatClosedHandler
      * @param listener
      */
+    @Deprecated
     public void onChatClosed(Listener<Chat> listener);
 
     /**
      * Event sent when the chat is created (either by the user or by another
      * user)
      * 
+     * @see addChatCreatedHandler
      * @param listener
      */
+    @Deprecated
     public void onChatCreated(Listener<Chat> listener);
 
     /**
      * Event sent when the user request to open the chat (either if its created
      * or not previously)
      * 
+     * 
+     * @see addChatOpenedHandler
      * @param listener
-     *            receives the chat as parameter
      */
+    @Deprecated
     public void onChatOpened(Listener<Chat> listener);
 
     /**
@@ -79,14 +125,6 @@ public interface ChatManager {
      * @return the Chat object
      */
     public Chat open(XmppURI uri);
-
-    HandlerRegistration addChatChangedHandler(ChatChangedHandler handler);
-
-    HandlerRegistration addChatClosedHandler(ChatChangedHandler handler);
-
-    HandlerRegistration addChatCreatedHandler(ChatChangedHandler handler);
-
-    HandlerRegistration addChatOpenedHandler(ChatChangedHandler handler);
 
     /**
      * Get a chat by uri. Can be null

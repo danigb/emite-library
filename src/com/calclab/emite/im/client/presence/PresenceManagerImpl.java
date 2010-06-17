@@ -21,8 +21,6 @@
  */
 package com.calclab.emite.im.client.presence;
 
-import java.util.Collection;
-
 import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.events.PresenceEvent;
 import com.calclab.emite.core.client.events.PresenceHandler;
@@ -33,9 +31,8 @@ import com.calclab.emite.core.client.xmpp.session.XmppSession.SessionState;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence.Type;
-import com.calclab.emite.im.client.roster.Roster;
-import com.calclab.emite.im.client.roster.RosterItem;
-import com.calclab.suco.client.events.Listener;
+import com.calclab.emite.im.client.roster.RosterStateChangedEvent;
+import com.calclab.emite.im.client.roster.Roster.RosterState;
 import com.google.gwt.core.client.GWT;
 
 /**
@@ -45,22 +42,20 @@ public class PresenceManagerImpl extends AbstractPresenceManager {
     static final Presence INITIAL_PRESENCE = new Presence(Type.unavailable, null, null);
     private final XmppSession session;
 
-    public PresenceManagerImpl(final EmiteEventBus eventBus, final XmppSession session, final Roster roster) {
+    public PresenceManagerImpl(final EmiteEventBus eventBus, final XmppSession session) {
 	super(eventBus);
 	this.session = session;
 	setOwnPresence(INITIAL_PRESENCE);
 
 	// Upon connecting to the server and becoming an active resource, a
 	// client SHOULD request the roster before sending initial presence
-	roster.onRosterRetrieved(new Listener<Collection<RosterItem>>() {
-	    public void onEvent(final Collection<RosterItem> parameter) {
-		GWT.log("Sending initial presence", null);
-		final Presence ownPresence = getOwnPresence();
-		final Presence initialPresence = ownPresence != INITIAL_PRESENCE ? ownPresence : new Presence(session
-			.getCurrentUser());
-		session.send(initialPresence);
-		setOwnPresence(initialPresence);
-		session.setReady();
+
+	eventBus.addHandler(RosterStateChangedEvent.getType(), new StateChangedHandler() {
+	    @Override
+	    public void onStateChanged(final StateChangedEvent event) {
+		if (event.is(RosterState.ready)) {
+		    sendInitialPresence();
+		}
 	    }
 	});
 
@@ -122,6 +117,17 @@ public class PresenceManagerImpl extends AbstractPresenceManager {
 	final Presence presence = new Presence(Type.unavailable, userURI, null);
 	session.send(presence);
 	setOwnPresence(presence);
+    }
+
+    private void sendInitialPresence() {
+	GWT.log("Sending initial presence");
+	final Presence ownPresence = getOwnPresence();
+	final Presence initialPresence = ownPresence != INITIAL_PRESENCE ? ownPresence : new Presence(session
+		.getCurrentUser());
+	session.send(initialPresence);
+	setOwnPresence(initialPresence);
+	session.setReady();
+
     }
 
 }

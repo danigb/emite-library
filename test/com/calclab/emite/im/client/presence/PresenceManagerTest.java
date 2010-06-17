@@ -1,23 +1,19 @@
 package com.calclab.emite.im.client.presence;
 
 import static com.calclab.emite.core.client.xmpp.stanzas.XmppURI.uri;
-import static com.calclab.suco.testing.events.Eventito.anyListener;
-import static com.calclab.suco.testing.events.Eventito.fire;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-
-import java.util.ArrayList;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence.Show;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence.Type;
-import com.calclab.emite.im.client.roster.Roster;
-import com.calclab.emite.im.client.roster.RosterItem;
+import com.calclab.emite.im.client.roster.RosterStateChangedEvent;
+import com.calclab.emite.im.client.roster.Roster.RosterState;
 import com.calclab.emite.xtesting.SessionTester;
 import com.calclab.suco.testing.events.MockedListener;
 
@@ -25,13 +21,13 @@ public class PresenceManagerTest {
 
     private PresenceManager manager;
     private SessionTester session;
-    private Roster roster;
+    private EmiteEventBus eventBus;
 
     @Before
     public void beforeTest() {
 	session = new SessionTester();
-	roster = mock(Roster.class);
-	manager = new PresenceManagerImpl(session.getEventBus(), session, roster);
+	eventBus = session.getEventBus();
+	manager = new PresenceManagerImpl(eventBus, session);
     }
 
     @Test
@@ -80,8 +76,7 @@ public class PresenceManagerTest {
     @Test
     public void shouldSendInitialPresenceAfterRosterReady() {
 	session.setLoggedIn(uri("myself@domain"));
-
-	fire(new ArrayList<RosterItem>()).when(roster).onRosterRetrieved(anyListener());
+	eventBus.fireEvent(new RosterStateChangedEvent(RosterState.ready));
 	session.verifySent("<presence from='myself@domain'></presence>");
     }
 

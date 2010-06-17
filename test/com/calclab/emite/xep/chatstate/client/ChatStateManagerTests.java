@@ -11,14 +11,12 @@ import com.calclab.emite.im.client.chat.Chat;
 import com.calclab.emite.im.client.chat.PairChatManager;
 import com.calclab.emite.xep.chatstate.client.ChatStateManager.ChatState;
 import com.calclab.emite.xtesting.SessionTester;
-import com.calclab.suco.testing.events.MockedListener;
 
-public class ChatStateManagerTest {
+public class ChatStateManagerTests {
     private static final XmppURI MYSELF = uri("self@domain/res");
     private static final XmppURI OTHER = uri("other@domain/other");
 
     private PairChatManager chatManager;
-    private MockedListener<ChatState> stateListener;
     private Chat chat;
     private ChatStateManager chatStateManager;
     private SessionTester session;
@@ -31,8 +29,6 @@ public class ChatStateManagerTest {
 	final StateManager stateManager = new StateManager(chatManager);
 	chat = chatManager.open(OTHER);
 	chatStateManager = stateManager.getChatState(chat);
-	stateListener = new MockedListener<ChatState>();
-	chatStateManager.onChatStateChanged(stateListener);
     }
 
     @Test
@@ -118,8 +114,10 @@ public class ChatStateManagerTest {
 
     @Test
     public void shouldStopAfterGone() {
-	session.receives("<message from='other@domain/other' to='self@domain/res' type='chat'><active /></message>");
-	session.receives("<message from='other@domain/other' to='self@domain/res' type='chat'><gone /></message>");
+	session
+		.receives("<message from='other@domain/other' to='self@domain/res' type='chat'><active xmlns='http://jabber.org/protocol/chatstates' /></message>");
+	session
+		.receives("<message from='other@domain/other' to='self@domain/res' type='chat'><gone xmlns='http://jabber.org/protocol/chatstates' /></message>");
 	chatStateManager.setOwnState(ChatStateManager.ChatState.composing);
 	chatStateManager.setOwnState(ChatStateManager.ChatState.pause);
 	session.verifySent("<message><active /></message>");

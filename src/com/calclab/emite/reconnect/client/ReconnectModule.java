@@ -2,8 +2,8 @@ package com.calclab.emite.reconnect.client;
 
 import com.calclab.emite.core.client.conn.XmppConnection;
 import com.calclab.emite.core.client.xmpp.sasl.SASLManager;
-import com.calclab.emite.core.client.xmpp.session.Session;
 import com.calclab.emite.core.client.xmpp.session.SessionComponent;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.suco.client.Suco;
 import com.calclab.suco.client.ioc.module.AbstractModule;
 import com.calclab.suco.client.ioc.module.Factory;
@@ -25,7 +25,7 @@ public class ReconnectModule extends AbstractModule implements EntryPoint {
 	register(SessionComponent.class, new Factory<SessionReconnect>(SessionReconnect.class) {
 	    @Override
 	    public SessionReconnect create() {
-		return new SessionReconnect($(XmppConnection.class), $(Session.class), $(SASLManager.class));
+		return new SessionReconnect($(XmppConnection.class), $(XmppSession.class), $(SASLManager.class));
 	    }
 	});
     }

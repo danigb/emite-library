@@ -31,7 +31,6 @@ import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence.Type;
-import com.calclab.suco.client.events.Listener;
 import com.calclab.suco.client.events.Listener2;
 import com.google.gwt.event.shared.HandlerRegistration;
 
@@ -63,18 +62,16 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 	    }
 	});
 
-	roster.onItemAdded(new Listener<RosterItem>() {
-	    public void onEvent(final RosterItem item) {
-		if (item.getSubscriptionState() == SubscriptionState.none) {
-		    // && item.getAsk() == Type.subscribe) {
-		    requestSubscribe(item.getJID());
-		    item.setSubscriptionState(SubscriptionState.nonePendingIn);
-		} else if (item.getSubscriptionState() == SubscriptionState.from) {
-		    approveSubscriptionRequest(item.getJID(), item.getName());
-		    item.setSubscriptionState(SubscriptionState.fromPendingOut);
+	eventBus.addHandler(RosterItemChangedEvent.getType(), new RosterItemChangedHandler() {
+	    @Override
+	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
+		if (event.is(RosterItemChangedEvent.ITEM_ADDED)) {
+		    addItem(event.getItem());
 		}
 	    }
+
 	});
+
     }
 
     public HandlerRegistration addSubscriptionRequestedHandler(final SubscriptionRequestedHandler handler) {
@@ -117,6 +114,17 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
     public void unsubscribe(final XmppURI jid) {
 	session.send(new Presence(Type.unsubscribe, session.getCurrentUser(), jid.getJID()));
+    }
+
+    private void addItem(final RosterItem item) {
+	if (item.getSubscriptionState() == SubscriptionState.none) {
+	    // && item.getAsk() == Type.subscribe) {
+	    requestSubscribe(item.getJID());
+	    item.setSubscriptionState(SubscriptionState.nonePendingIn);
+	} else if (item.getSubscriptionState() == SubscriptionState.from) {
+	    approveSubscriptionRequest(item.getJID(), item.getName());
+	    item.setSubscriptionState(SubscriptionState.fromPendingOut);
+	}
     }
 
 }

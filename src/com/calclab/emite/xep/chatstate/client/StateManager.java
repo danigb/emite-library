@@ -22,8 +22,11 @@
 package com.calclab.emite.xep.chatstate.client;
 
 import com.calclab.emite.im.client.chat.Chat;
+import com.calclab.emite.im.client.chat.ChatChangedEvent;
+import com.calclab.emite.im.client.chat.ChatChangedHandler;
 import com.calclab.emite.im.client.chat.ChatManager;
-import com.calclab.suco.client.events.Listener;
+import com.calclab.emite.im.client.chat.ChatChangedEvent.ChatChange;
+import com.calclab.emite.xep.chatstate.client.ChatStateManager.ChatUserState;
 import com.google.gwt.core.client.GWT;
 
 /**
@@ -39,23 +42,24 @@ public class StateManager {
 
     public StateManager(final ChatManager chatManager) {
 
-	chatManager.onChatCreated(new Listener<Chat>() {
-	    public void onEvent(final Chat chat) {
-		getChatState(chat);
+	chatManager.addChatChangedHandler(new ChatChangedHandler() {
+	    @Override
+	    public void onChatChanged(final ChatChangedEvent event) {
+		if (event.is(ChatChange.created)) {
+		    getChatState(event.getChat());
+		} else if (event.is(ChatChange.closed)) {
+		    final Chat chat = event.getChat();
+		    GWT.log("Removing chat state to chat: " + chat.getID());
+		    final ChatStateManager chatStateManager = chat.getData(ChatStateManager.class);
+		    if (chatStateManager != null && chatStateManager.getOtherUserState() != ChatUserState.gone) {
+			// We are closing, then we send the gone state
+			chatStateManager.setOwnChatUserState(ChatUserState.gone);
+		    }
+		    chat.setData(ChatStateManager.class, null);
+		}
 	    }
 	});
 
-	chatManager.onChatClosed(new Listener<Chat>() {
-	    public void onEvent(final Chat chat) {
-		GWT.log("Removing chat state to chat: " + chat.getID(), null);
-		final ChatStateManager chatStateManager = chat.getData(ChatStateManager.class);
-		if (chatStateManager != null && chatStateManager.getOtherState() != ChatStateManager.ChatState.gone) {
-		    // We are closing, then we send the gone state
-		    chatStateManager.setOwnState(ChatStateManager.ChatState.gone);
-		}
-		chat.setData(ChatStateManager.class, null);
-	    }
-	});
     }
 
     public ChatStateManager getChatState(final Chat chat) {
@@ -69,8 +73,6 @@ public class StateManager {
     private ChatStateManager createChatState(final Chat chat) {
 	GWT.log("Adding chat state to chat: " + chat.getID(), null);
 	final ChatStateManager chatStateManager = new ChatStateManager(chat);
-	chat.setData(ChatStateManager.class, chatStateManager);
-	chat.onBeforeSend(chatStateManager.doBeforeSend);
 	return chatStateManager;
     }
 

@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.calclab.emite.core.client.events.DefaultEmiteEventBus;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.im.client.chat.PairChat;
@@ -22,7 +23,9 @@ public class ChatStateTest {
 
     @Before
     public void aaCreate() {
+	final DefaultEmiteEventBus eventBus = new DefaultEmiteEventBus();
 	pairChat = Mockito.mock(PairChat.class);
+	Mockito.when(pairChat.getChatEventBus()).thenReturn(eventBus);
 	chatStateManager = new ChatStateManager(pairChat);
 	stateListener = new MockedListener<ChatState>();
 	chatStateManager.onChatStateChanged(stateListener);

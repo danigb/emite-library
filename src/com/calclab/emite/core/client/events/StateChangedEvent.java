@@ -8,6 +8,8 @@ public abstract class StateChangedEvent extends GwtEvent<StateChangedHandler> {
     private final Type<StateChangedHandler> type;
 
     protected StateChangedEvent(final Type<StateChangedHandler> type, final String state) {
+	assert type != null : "Type in StateChanged can't be null";
+	assert state != null : "State in StateChanged can't be null";
 	this.type = type;
 	this.state = state;
     }
@@ -19,6 +21,10 @@ public abstract class StateChangedEvent extends GwtEvent<StateChangedHandler> {
 
     public String getState() {
 	return state;
+    }
+
+    public boolean is(final String state) {
+	return this.state.equals(state);
     }
 
     @Override
