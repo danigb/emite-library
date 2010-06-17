@@ -34,7 +34,7 @@ public class SessionReady {
 
     public SessionReady(final XmppSession session) {
 
-	session.addStateChangedHandler(new StateChangedHandler() {
+	session.addSessionStateChangedHandler(new StateChangedHandler() {
 	    @Override
 	    public void onStateChanged(final StateChangedEvent event) {
 		GWT.log("SESSION READY: no roster");

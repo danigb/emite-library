@@ -23,6 +23,7 @@ package com.calclab.emite.xep.avatar.client;
 
 import java.util.List;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.events.PresenceEvent;
 import com.calclab.emite.core.client.events.PresenceHandler;
 import com.calclab.emite.core.client.packet.IPacket;
@@ -33,8 +34,8 @@ import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ.Type;
-import com.calclab.suco.client.events.Event;
 import com.calclab.suco.client.events.Listener;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * XEP-0153: vCard-Based Avatars (Version 1.0)
@@ -46,14 +47,12 @@ public class AvatarManager {
     private static final String PHOTO = "PHOTO";
     private static final String TYPE = "TYPE";
     private static final String BINVAL = "BINVAL";
-    private final Event<Presence> onHashPresenceReceived;
-    private final Event<AvatarVCard> onVCardReceived;
     private final XmppSession session;
+    private final EmiteEventBus eventBus;
 
-    public AvatarManager(final XmppSession session) {
+    public AvatarManager(final EmiteEventBus eventBus, final XmppSession session) {
+	this.eventBus = eventBus;
 	this.session = session;
-	onHashPresenceReceived = new Event<Presence>("avatar:onHashPresenceReceived");
-	onVCardReceived = new Event<AvatarVCard>("avatar:onVCardReceived");
 
 	session.addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
@@ -62,7 +61,7 @@ public class AvatarManager {
 		final List<? extends IPacket> children = presence.getChildren(FILTER_X);
 		for (final IPacket child : children) {
 		    if (child.hasAttribute("xmlns", XMLNS + ":x:update")) {
-			onHashPresenceReceived.fire(presence);
+			eventBus.fireEvent(new IncomingHashPresenceEvent(presence));
 		    }
 		}
 
@@ -70,12 +69,48 @@ public class AvatarManager {
 	});
     }
 
+    /**
+     * Add a handler to know when a avatar vcard has arrived
+     * 
+     * @param handler
+     *            the handler
+     * @return a handler registration to detach the handler
+     */
+    public HandlerRegistration addIncomingAvatarVCardHandler(final IncomingAvatarVCardHandler handler) {
+	return eventBus.addHandler(IncomingAvatarVCardEvent.getType(), handler);
+    }
+
+    /**
+     * Add a handler to know when a hash presence has arrived
+     * 
+     * @param handler
+     * @return a handler registration object to detach the handler
+     */
+    public HandlerRegistration addIncomingHashPresenceHandler(final PresenceHandler handler) {
+	return eventBus.addHandler(IncomingHashPresenceEvent.getType(), handler);
+    }
+
+    /**
+     * @see addHashPresenceHandler
+     * @param listener
+     */
+    @Deprecated
     public void onHashPresenceReceived(final Listener<Presence> listener) {
-	onHashPresenceReceived.add(listener);
+	addIncomingHashPresenceHandler(new PresenceHandler() {
+	    @Override
+	    public void onIncomingPresence(final PresenceEvent event) {
+		listener.onEvent(event.getPresence());
+	    }
+	});
     }
 
     public void onVCardReceived(final Listener<AvatarVCard> listener) {
-	onVCardReceived.add(listener);
+	addIncomingAvatarVCardHandler(new IncomingAvatarVCardHandler() {
+	    @Override
+	    public void onIncomingAvatarVCard(final IncomingAvatarVCardEvent event) {
+		listener.onEvent(event.getAvatarVCard());
+	    }
+	});
     }
 
     /**
@@ -99,7 +134,7 @@ public class AvatarManager {
 		    final String photoType = photo.getFirstChild(TYPE).getText();
 		    final String photoBinval = photo.getFirstChild(BINVAL).getText();
 		    final AvatarVCard avatar = new AvatarVCard(from, null, photoType, photoBinval);
-		    onVCardReceived.fire(avatar);
+		    eventBus.fireEvent(new IncomingAvatarVCardEvent(avatar));
 		}
 
 	    }

@@ -67,7 +67,7 @@ public class PairChat extends AbstractChat {
 	    }
 	});
 
-	session.addStateChangedHandler(new StateChangedHandler() {
+	session.addSessionStateChangedHandler(new StateChangedHandler() {
 	    @Override
 	    public void onStateChanged(final StateChangedEvent event) {
 		setStateFromSessionState(session);

@@ -21,6 +21,7 @@
  */
 package com.calclab.emite.xep.avatar.client;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.suco.client.Suco;
 import com.calclab.suco.client.ioc.decorator.Singleton;
@@ -49,7 +50,7 @@ public class AvatarModule extends AbstractModule implements EntryPoint {
 	register(Singleton.class, new Factory<AvatarManager>(AvatarManager.class) {
 	    @Override
 	    public AvatarManager create() {
-		return new AvatarManager($(XmppSession.class));
+		return new AvatarManager($(EmiteEventBus.class), $(XmppSession.class));
 	    }
 	});
     }

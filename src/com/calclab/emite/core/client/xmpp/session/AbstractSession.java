@@ -75,7 +75,7 @@ public abstract class AbstractSession extends AbstractXmppSession implements Ses
     }
 
     public void onStateChanged(final Listener<Session> listener) {
-	addStateChangedHandler(new StateChangedHandler() {
+	addSessionStateChangedHandler(new StateChangedHandler() {
 	    @Override
 	    public void onStateChanged(final StateChangedEvent event) {
 		listener.onEvent(AbstractSession.this);

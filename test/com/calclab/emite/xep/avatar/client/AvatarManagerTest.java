@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.xtesting.SessionTester;
@@ -16,11 +17,13 @@ import com.calclab.suco.testing.events.MockedListener;
 public class AvatarManagerTest {
     private AvatarManager avatarManager;
     private SessionTester session;
+    private EmiteEventBus eventBus;
 
     @Before
     public void aaaCreateManager() {
 	session = new SessionTester();
-	avatarManager = new AvatarManager(session);
+	eventBus = session.getEventBus();
+	avatarManager = new AvatarManager(eventBus, session);
     }
 
     @SuppressWarnings("unchecked")
@@ -28,7 +31,7 @@ public class AvatarManagerTest {
     public void managerShouldListenPresenceWithPhoto() {
 	final Listener<Presence> listener = Mockito.mock(Listener.class);
 	avatarManager.onHashPresenceReceived(listener);
-	final Presence presence = new Presence(XmppURI.uri(("juliet@capulet.com/balcony")));
+	final Presence presence = new Presence(XmppURI.uri("juliet@capulet.com/balcony"));
 	presence.addChild("x", "vcard-temp:x:update").addChild("photo", null).setText("sha1-hash-of-image");
 	session.receives(presence);
 	Mockito.verify(listener).onEvent(presence);

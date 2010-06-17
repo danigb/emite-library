@@ -54,7 +54,7 @@ public class DiscoveryManager {
 	this.session = session;
 	filterQuery = MatcherFactory.byNameAndXMLNS("query", "http://jabber.org/protocol/disco#info");
 
-	session.addStateChangedHandler(new StateChangedHandler() {
+	session.addSessionStateChangedHandler(new StateChangedHandler() {
 	    @Override
 	    public void onStateChanged(final StateChangedEvent event) {
 		if (session.getSessionState() == XmppSession.SessionState.loggedIn) {

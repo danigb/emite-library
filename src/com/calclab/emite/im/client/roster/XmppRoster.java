@@ -58,7 +58,7 @@ public class XmppRoster extends AbstractRoster implements Roster {
 	super(eventBus);
 	this.session = session;
 
-	session.addStateChangedHandler(new StateChangedHandler() {
+	session.addSessionStateChangedHandler(new StateChangedHandler() {
 	    @Override
 	    public void onStateChanged(final StateChangedEvent event) {
 		if (session.getSessionState() == XmppSession.SessionState.loggedIn) {

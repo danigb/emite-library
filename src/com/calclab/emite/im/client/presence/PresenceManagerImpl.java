@@ -73,7 +73,7 @@ public class PresenceManagerImpl extends AbstractPresenceManager {
 	    }
 	});
 
-	session.addStateChangedHandler(new StateChangedHandler() {
+	session.addSessionStateChangedHandler(new StateChangedHandler() {
 	    @Override
 	    public void onStateChanged(final StateChangedEvent event) {
 		final String state = event.getState();

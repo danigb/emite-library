@@ -194,5 +194,5 @@ public interface XmppSession {
 
     HandlerRegistration addIncomingPresenceHandler(PresenceHandler handler);
 
-    HandlerRegistration addStateChangedHandler(StateChangedHandler handler);
+    HandlerRegistration addSessionStateChangedHandler(StateChangedHandler handler);
 }

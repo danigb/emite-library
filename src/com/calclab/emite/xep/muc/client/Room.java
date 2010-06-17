@@ -88,7 +88,7 @@ public class Room extends AbstractChat implements Chat {
 	    }
 	});
 
-	session.addStateChangedHandler(new StateChangedHandler() {
+	session.addSessionStateChangedHandler(new StateChangedHandler() {
 
 	    @Override
 	    public void onStateChanged(final StateChangedEvent event) {

@@ -49,7 +49,7 @@ public class ExampleXmppSession implements EntryPoint {
 	     * We track session state changes. We can only send messages when
 	     * the state == loggedIn.
 	     */
-	    session.addStateChangedHandler(new StateChangedHandler() {
+	    session.addSessionStateChangedHandler(new StateChangedHandler() {
 		@Override
 		public void onStateChanged(final StateChangedEvent event) {
 		    final String state = event.getState();

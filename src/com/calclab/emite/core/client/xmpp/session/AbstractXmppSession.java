@@ -3,9 +3,8 @@ package com.calclab.emite.core.client.xmpp.session;
 import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.events.IQEvent;
 import com.calclab.emite.core.client.events.IQHandler;
-import com.calclab.emite.core.client.events.MessageReceivedEvent;
 import com.calclab.emite.core.client.events.MessageHandler;
-import com.calclab.emite.core.client.events.PresenceEvent;
+import com.calclab.emite.core.client.events.MessageReceivedEvent;
 import com.calclab.emite.core.client.events.PresenceHandler;
 import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
@@ -35,11 +34,11 @@ public abstract class AbstractXmppSession implements XmppSession {
 
     @Override
     public HandlerRegistration addIncomingPresenceHandler(final PresenceHandler handler) {
-	return eventBus.addHandler(PresenceEvent.getType(), handler);
+	return eventBus.addHandler(IncomingPresenceEvent.getType(), handler);
     }
 
     @Override
-    public HandlerRegistration addStateChangedHandler(final StateChangedHandler handler) {
+    public HandlerRegistration addSessionStateChangedHandler(final StateChangedHandler handler) {
 	return eventBus.addHandler(SessionStateChangedEvent.getType(), handler);
     }
 
@@ -61,7 +60,7 @@ public abstract class AbstractXmppSession implements XmppSession {
     }
 
     protected void firePresence(final Presence presence) {
-	eventBus.fireEvent(new PresenceEvent(presence));
+	eventBus.fireEvent(new IncomingPresenceEvent(presence));
     }
 
     protected void setSessionState(final String state) {
