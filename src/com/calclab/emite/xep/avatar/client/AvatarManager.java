@@ -29,6 +29,7 @@ import com.calclab.emite.core.client.events.PresenceHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
+import com.calclab.emite.core.client.xmpp.session.IQResponseHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
@@ -125,8 +126,8 @@ public class AvatarManager {
     public void requestVCard(final XmppURI otherJID) {
 	final IQ iq = new IQ(Type.get, otherJID);
 	iq.addChild(VCARD, XMLNS);
-	session.sendIQ("avatar", iq, new Listener<IPacket>() {
-	    public void onEvent(final IPacket received) {
+	session.sendIQ("avatar", iq, new IQResponseHandler() {
+	    public void onIQ(final IQ received) {
 		if (received.hasAttribute("type", "result") && received.hasChild(VCARD)
 			&& received.hasAttribute("to", session.getCurrentUser().toString())) {
 		    final XmppURI from = XmppURI.jid(received.getAttribute("from"));
@@ -149,8 +150,8 @@ public class AvatarManager {
 	vcard.setAttribute("prodid", "-//HandGen//NONSGML vGen v1.0//EN");
 	vcard.setAttribute("version", "2.0");
 	vcard.addChild(PHOTO, null).addChild(BINVAL, null).setText(photoBinary);
-	session.sendIQ("avatar", iq, new Listener<IPacket>() {
-	    public void onEvent(final IPacket received) {
+	session.sendIQ("avatar", iq, new IQResponseHandler() {
+	    public void onIQ(final IQ received) {
 		if (IQ.isSuccess(received)) {
 
 		}

@@ -35,6 +35,7 @@ import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
 import com.calclab.emite.core.client.xmpp.datetime.XmppDateTime;
+import com.calclab.emite.core.client.xmpp.session.IQResponseHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.BasicStanza;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
@@ -455,8 +456,8 @@ public class Room extends AbstractChat implements Chat {
     protected void requestCreateInstantRoom() {
 	final IQ iq = new IQ(IQ.Type.set, getURI().getJID());
 	iq.addQuery("http://jabber.org/protocol/muc#owner").addChild("x", "jabber:x:data").With("type", "submit");
-	session.sendIQ("rooms", iq, new Listener<IPacket>() {
-	    public void onEvent(final IPacket received) {
+	session.sendIQ("rooms", iq, new IQResponseHandler() {
+	    public void onIQ(final IQ received) {
 		if (IQ.isSuccess(received)) {
 		    setChatState(ChatState.ready);
 		}

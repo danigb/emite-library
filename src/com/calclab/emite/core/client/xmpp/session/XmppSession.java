@@ -8,7 +8,6 @@ import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
-import com.calclab.suco.client.events.Listener;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
@@ -168,6 +167,8 @@ public interface XmppSession {
      * the category provided and a internal sequential number. This method also
      * overrides (if present) the given 'from' attribute
      * 
+     * If the listener is null, the IQ is sent but no callback called
+     * 
      * <b>All the stanzas sent using this method BEFORE the LoggedIn state are
      * queued and sent AFTER Ready state.</b>
      * 
@@ -176,12 +177,13 @@ public interface XmppSession {
      *            generate a sequential and uniqe id for the IQ
      * @param iq
      *            the IQ stanza to be sent
-     * @param listener
-     *            the listener called when a IQ of type "result" arrives to the
-     *            server. After the invocation, the listener is discarded
+     * @param handler
+     *            the handler called when a IQ of type "result" arrives to the
+     *            server. After the invocation, the handler is discarded. It CAN
+     *            be null
      * 
      */
-    public abstract void sendIQ(final String category, final IQ iq, final Listener<IPacket> listener);
+    public abstract void sendIQ(final String category, final IQ iq, final IQResponseHandler iqHandler);
 
     /**
      * Presence managers should call this method when initial presence is sent

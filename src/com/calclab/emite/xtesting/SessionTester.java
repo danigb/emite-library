@@ -13,6 +13,7 @@ import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.session.AbstractSession;
 import com.calclab.emite.core.client.xmpp.session.Credentials;
+import com.calclab.emite.core.client.xmpp.session.IQResponseHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
@@ -36,7 +37,7 @@ public class SessionTester extends AbstractSession {
     private final TigaseXMLService xmler;
     private final ArrayList<IPacket> sent;
     private IPacket lastIQSent;
-    private Listener<IPacket> lastIQListener;
+    private IQResponseHandler lastIQHandler;
 
     public SessionTester() {
 	this((XmppURI) null);
@@ -67,12 +68,12 @@ public class SessionTester extends AbstractSession {
 	}
     }
 
-    public void answer(final IPacket iq) {
-	lastIQListener.onEvent(iq);
+    public void answer(final IQ iq) {
+	lastIQHandler.onIQ(iq);
     }
 
     public void answer(final String iq) {
-	answer(xmler.toXML(iq));
+	answer(new IQ(xmler.toXML(iq)));
     }
 
     public void answerSuccess() {
@@ -137,9 +138,21 @@ public class SessionTester extends AbstractSession {
 	sent.add(packet);
     }
 
-    public void sendIQ(final String id, final IQ iq, final Listener<IPacket> listener) {
+    @Override
+    public void sendIQ(final String category, final IQ iq, final IQResponseHandler iqHandler) {
 	lastIQSent = iq;
-	lastIQListener = listener;
+	lastIQHandler = iqHandler;
+    }
+
+    @Override
+    @Deprecated
+    public void sendIQ(final String id, final IQ iq, final Listener<IPacket> listener) {
+	sendIQ(id, iq, new IQResponseHandler() {
+	    @Override
+	    public void onIQ(final IQ iq) {
+		listener.onEvent(iq);
+	    }
+	});
     }
 
     public void setCurrentUser(final XmppURI currentUser) {
@@ -164,10 +177,10 @@ public class SessionTester extends AbstractSession {
 	super.setSessionState(state);
     }
 
-    public Listener<IPacket> verifyIQSent(final IPacket iq) {
+    public IQResponseHandler verifyIQSent(final IPacket iq) {
 	assertNotNull(lastIQSent);
 	EmiteAsserts.assertPacketLike(iq, lastIQSent);
-	return lastIQListener;
+	return lastIQHandler;
     }
 
     public void verifyIQSent(final String xml) {
@@ -216,4 +229,5 @@ public class SessionTester extends AbstractSession {
 	}
 	return isContained;
     }
+
 }

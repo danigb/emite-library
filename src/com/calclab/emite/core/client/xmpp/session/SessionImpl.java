@@ -5,7 +5,6 @@ import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
-import com.calclab.suco.client.events.Listener;
 import com.google.inject.Inject;
 
 public class SessionImpl extends AbstractSession implements Session {
@@ -54,8 +53,8 @@ public class SessionImpl extends AbstractSession implements Session {
     }
 
     @Override
-    public void sendIQ(final String category, final IQ iq, final Listener<IPacket> listener) {
-	delegate.sendIQ(category, iq, listener);
+    public void sendIQ(final String category, final IQ iq, final IQResponseHandler iqHandler) {
+	delegate.sendIQ(category, iq, iqHandler);
     }
 
     @Override

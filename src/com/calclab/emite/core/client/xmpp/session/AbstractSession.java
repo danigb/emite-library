@@ -30,6 +30,7 @@ import com.calclab.emite.core.client.events.PresenceEvent;
 import com.calclab.emite.core.client.events.PresenceHandler;
 import com.calclab.emite.core.client.events.StateChangedEvent;
 import com.calclab.emite.core.client.events.StateChangedHandler;
+import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
@@ -38,11 +39,11 @@ import com.calclab.suco.client.events.Listener;
 /**
  * Session event plumbing.
  */
+@Deprecated
 public abstract class AbstractSession extends AbstractXmppSession implements Session {
 
     public AbstractSession(final EmiteEventBus eventBus) {
 	super(eventBus);
-
     }
 
     @Override
@@ -79,6 +80,15 @@ public abstract class AbstractSession extends AbstractXmppSession implements Ses
 	    @Override
 	    public void onStateChanged(final StateChangedEvent event) {
 		listener.onEvent(AbstractSession.this);
+	    }
+	});
+    }
+
+    public void sendIQ(final String category, final IQ iq, final Listener<IPacket> listener) {
+	sendIQ(category, iq, new IQResponseHandler() {
+	    @Override
+	    public void onIQ(final IQ iq) {
+		listener.onEvent(iq);
 	    }
 	});
     }

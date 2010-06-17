@@ -21,6 +21,7 @@
  */
 package com.calclab.emite.core.client.xmpp.session;
 
+import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
@@ -32,7 +33,6 @@ import com.calclab.suco.client.events.Listener;
  */
 @Deprecated
 public interface Session extends XmppSession {
-
     /**
      * The given listener is called when a IQ <b>of type 'get' or 'set'</b> is
      * received
@@ -62,5 +62,8 @@ public interface Session extends XmppSession {
      * @param listener
      */
     public abstract void onStateChanged(final Listener<Session> listener);
+
+    @Deprecated
+    public abstract void sendIQ(final String category, final IQ iq, final Listener<IPacket> listener);
 
 }

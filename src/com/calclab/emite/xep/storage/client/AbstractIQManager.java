@@ -1,10 +1,10 @@
 package com.calclab.emite.xep.storage.client;
 
 import com.calclab.emite.core.client.packet.IPacket;
+import com.calclab.emite.core.client.xmpp.session.IQResponseHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
-import com.calclab.suco.client.events.Listener;
 
 /**
  * Class AbstractIQManager (trying to generalize this kind of IQManagers) Move
@@ -47,13 +47,13 @@ public class AbstractIQManager {
     /**
      * Get method (without to/from)
      * 
-     * @param listener
-     *            the listener
+     * @param handler
+     *            the handler
      * @param childs
      *            the childs
      */
-    protected void get(final Listener<IQResponse> listener, final IPacket... childs) {
-	get(null, null, listener, childs);
+    protected void get(final IQResponseHandler handler, final IPacket... childs) {
+	get(null, null, handler, childs);
     }
 
     /**
@@ -63,39 +63,18 @@ public class AbstractIQManager {
      *            the from uri
      * @param to
      *            the to uri
-     * @param listener
-     *            the response listener
+     * @param handler
+     *            the response handler
      * @param childs
      *            the childs to add to the get IQ packet
      */
-    protected void get(final XmppURI from, final XmppURI to, final Listener<IQResponse> listener,
-	    final IPacket... childs) {
+    protected void get(final XmppURI from, final XmppURI to, final IQResponseHandler handler, final IPacket... childs) {
 	final IQ iq = new IQ(IQ.Type.get);
 	setFromTo(from, to, iq);
 	for (final IPacket child : childs) {
 	    iq.addChild(child);
 	}
-	session.sendIQ(idPrefix, iq, new Listener<IPacket>() {
-	    @Override
-	    public void onEvent(final IPacket parameter) {
-		handleResponse(parameter, listener);
-	    }
-	});
-    }
-
-    /**
-     * Handle response.
-     * 
-     * @param result
-     *            the result
-     * @param listener
-     *            the listener
-     */
-    protected void handleResponse(final IPacket result, final Listener<IQResponse> listener) {
-	final IQResponse response = new IQResponse(result);
-	if (listener != null) {
-	    listener.onEvent(response);
-	}
+	session.sendIQ(idPrefix, iq, handler);
     }
 
     /**
@@ -106,8 +85,8 @@ public class AbstractIQManager {
      * @param childs
      *            the childs to add to the IQ set packet
      */
-    protected void set(final Listener<IQResponse> listener, final IPacket... childs) {
-	set(null, null, listener, childs);
+    protected void set(final IQResponseHandler handler, final IPacket... childs) {
+	set(null, null, handler, childs);
     }
 
     /**
@@ -122,18 +101,12 @@ public class AbstractIQManager {
      * @param childs
      *            the childs to add to the IQ set packet
      */
-    protected void set(final XmppURI from, final XmppURI to, final Listener<IQResponse> listener,
-	    final IPacket... childs) {
+    protected void set(final XmppURI from, final XmppURI to, final IQResponseHandler handler, final IPacket... childs) {
 	final IQ iq = new IQ(IQ.Type.set);
 	setFromTo(from, to, iq);
 	for (final IPacket child : childs) {
 	    iq.addChild(child);
 	}
-	session.sendIQ(idPrefix, iq, new Listener<IPacket>() {
-	    @Override
-	    public void onEvent(final IPacket parameter) {
-		handleResponse(parameter, listener);
-	    }
-	});
+	session.sendIQ(idPrefix, iq, handler);
     }
 }

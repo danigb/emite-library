@@ -1,6 +1,6 @@
 package com.calclab.emite.xep.search.client;
 
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.suco.client.Suco;
 import com.calclab.suco.client.ioc.decorator.Singleton;
 import com.calclab.suco.client.ioc.module.AbstractModule;
@@ -33,7 +33,7 @@ public class SearchModule extends AbstractModule implements EntryPoint {
 	register(Singleton.class, new Factory<SearchManager>(SearchManager.class) {
 	    @Override
 	    public SearchManager create() {
-		return new SearchManagerImpl($(Session.class));
+		return new SearchManagerImpl($(XmppSession.class));
 	    }
 	});
     }

@@ -1,13 +1,14 @@
 package com.calclab.emite.xep.storage.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.calclab.emite.core.client.xmpp.session.IQResponseTestHandler;
 import com.calclab.emite.xtesting.SessionTester;
 import com.calclab.emite.xtesting.services.TigaseXMLService;
-import com.calclab.suco.testing.events.MockedListener;
 
 public class PrivateStorageManagerTest {
     private SessionTester session;
@@ -29,20 +30,18 @@ public class PrivateStorageManagerTest {
 
     @Test
     public void shouldStore() {
-	final MockedListener<IQResponse> listener = new MockedListener<IQResponse>();
-	manager.store(new SimpleStorageData(TigaseXMLService.toPacket(data)), listener);
+	manager.store(new SimpleStorageData(TigaseXMLService.toPacket(data)), null);
 	session.verifyIQSent(storeData);
-	listener.isCalledOnce();
     }
 
     @Test
     public void shoulGet() {
-	final MockedListener<IQResponse> listener = new MockedListener<IQResponse>();
-	manager.retrieve(new SimpleStorageData("exodus", "exodus:prefs"), listener);
+	final IQResponseTestHandler handler = new IQResponseTestHandler();
+	manager.retrieve(new SimpleStorageData("exodus", "exodus:prefs"), handler);
 	session.verifyIQSent(retriveData);
 	session.answer(retrieveResponse);
-	listener.isCalledOnce();
-	assertEquals("Hamlet", listener.getValue(0).getFirstChild("query").getFirstChild("exodus").getFirstChild(
+	assertTrue(handler.hasIq());
+	assertEquals("Hamlet", handler.getIq().getFirstChild("query").getFirstChild("exodus").getFirstChild(
 		"defaultnick").getText());
     }
 }

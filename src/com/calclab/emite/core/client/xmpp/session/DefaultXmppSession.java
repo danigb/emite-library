@@ -42,7 +42,6 @@ import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
-import com.calclab.suco.client.events.Listener;
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
 
@@ -187,8 +186,8 @@ public class DefaultXmppSession extends AbstractXmppSession {
 	}
     }
 
-    public void sendIQ(final String category, final IQ iq, final Listener<IPacket> listener) {
-	final String id = iqManager.register(category, listener);
+    public void sendIQ(final String category, final IQ iq, final IQResponseHandler handler) {
+	final String id = iqManager.register(category, handler);
 	iq.setAttribute("id", id);
 	send(iq);
     }

@@ -24,7 +24,7 @@ package com.calclab.emite.core.client.xmpp.session;
 import java.util.HashMap;
 
 import com.calclab.emite.core.client.packet.IPacket;
-import com.calclab.suco.client.events.Listener;
+import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 
 /**
  * Handles IQ listeners and generates uniqe ids based on category strings. Used
@@ -33,27 +33,29 @@ import com.calclab.suco.client.events.Listener;
  */
 class IQManager {
     private int id;
-    private final HashMap<String, Listener<IPacket>> listeners;
+    private final HashMap<String, IQResponseHandler> listeners;
 
     public IQManager() {
 	id = 0;
-	this.listeners = new HashMap<String, Listener<IPacket>>();
+	listeners = new HashMap<String, IQResponseHandler>();
     }
 
     public boolean handle(final IPacket received) {
 	final String key = received.getAttribute("id");
-	final Listener<IPacket> listener = listeners.remove(key);
-	final boolean isHandled = listener != null;
+	final IQResponseHandler handler = listeners.remove(key);
+	final boolean isHandled = handler != null;
 	if (isHandled) {
-	    listener.onEvent(received);
+	    handler.onIQ(new IQ(received));
 	}
 	return isHandled;
     }
 
-    public String register(final String category, final Listener<IPacket> listener) {
+    public String register(final String category, final IQResponseHandler handler) {
 	id++;
 	final String key = category + "_" + id;
-	listeners.put(key, listener);
+	if (handler != null) {
+	    listeners.put(key, handler);
+	}
 	return key;
     }
 }

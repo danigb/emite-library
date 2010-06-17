@@ -30,11 +30,11 @@ import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
+import com.calclab.emite.core.client.xmpp.session.IQResponseHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ.Type;
-import com.calclab.suco.client.events.Listener;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 public class DiscoveryManager {
@@ -85,8 +85,8 @@ public class DiscoveryManager {
     public void sendDiscoQuery(final XmppURI uri) {
 	final IQ iq = new IQ(Type.get, uri.getHostURI());
 	iq.addQuery("http://jabber.org/protocol/disco#info");
-	session.sendIQ("disco", iq, new Listener<IPacket>() {
-	    public void onEvent(final IPacket response) {
+	session.sendIQ("disco", iq, new IQResponseHandler() {
+	    public void onIQ(final IQ response) {
 		final IPacket query = response.getFirstChild(filterQuery);
 		processIdentity(query.getChildren(MatcherFactory.byName("identity")));
 		processFeatures(query.getChildren(MatcherFactory.byName("features")));

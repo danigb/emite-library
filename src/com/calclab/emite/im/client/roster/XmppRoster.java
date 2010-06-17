@@ -34,13 +34,13 @@ import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.MatcherFactory;
 import com.calclab.emite.core.client.packet.PacketMatcher;
+import com.calclab.emite.core.client.xmpp.session.IQResponseHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.IQ.Type;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence.Show;
-import com.calclab.suco.client.events.Listener;
 import com.google.gwt.core.client.GWT;
 
 /**
@@ -115,10 +115,7 @@ public class XmppRoster extends AbstractRoster implements Roster {
 	    final IQ iq = new IQ(Type.set);
 	    final IPacket itemNode = iq.addQuery("jabber:iq:roster").addChild("item", null);
 	    itemNode.With("subscription", "remove").With("jid", item.getJID().toString());
-	    session.sendIQ("remove-roster-item", iq, new Listener<IPacket>() {
-		public void onEvent(final IPacket parameter) {
-		}
-	    });
+	    session.sendIQ("remove-roster-item", iq, null);
 	}
     }
 
@@ -133,10 +130,7 @@ public class XmppRoster extends AbstractRoster implements Roster {
 	if (getItemByJID(item.getJID()) != null) {
 	    final IQ iq = new IQ(Type.set);
 	    item.addStanzaTo(iq.addQuery("jabber:iq:roster"));
-	    session.sendIQ("roster", iq, new Listener<IPacket>() {
-		public void onEvent(final IPacket parameter) {
-		}
-	    });
+	    session.sendIQ("roster", iq, null);
 	}
     }
 
@@ -147,8 +141,9 @@ public class XmppRoster extends AbstractRoster implements Roster {
 	for (final RosterItem item : items) {
 	    item.addStanzaTo(rosterQuery);
 	}
-	session.sendIQ("roster", iq, new Listener<IPacket>() {
-	    public void onEvent(final IPacket parameter) {
+	session.sendIQ("roster", iq, new IQResponseHandler() {
+	    @Override
+	    public void onIQ(final IQ iq) {
 	    }
 	});
     }
@@ -167,10 +162,7 @@ public class XmppRoster extends AbstractRoster implements Roster {
 	item.setGroups(groups);
 	final IQ iq = new IQ(Type.set);
 	item.addStanzaTo(iq.addQuery("jabber:iq:roster"));
-	session.sendIQ("roster", iq, new Listener<IPacket>() {
-	    public void onEvent(final IPacket parameter) {
-	    }
-	});
+	session.sendIQ("roster", iq, null);
     }
 
     private void handleItemChanged(final RosterItem item) {
@@ -198,8 +190,8 @@ public class XmppRoster extends AbstractRoster implements Roster {
 
     private void requestRoster(final XmppURI user) {
 	GWT.log("Request roster");
-	session.sendIQ("roster", new IQ(IQ.Type.get, null).WithQuery("jabber:iq:roster"), new Listener<IPacket>() {
-	    public void onEvent(final IPacket received) {
+	session.sendIQ("roster", new IQ(IQ.Type.get, null).WithQuery("jabber:iq:roster"), new IQResponseHandler() {
+	    public void onIQ(final IQ received) {
 		if (IQ.isSuccess(received)) {
 		    clearGroupAll();
 		    final List<? extends IPacket> children = received.getFirstChild("query").getChildren();
