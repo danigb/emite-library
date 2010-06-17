@@ -12,7 +12,7 @@ public class StateChangedTestHandler implements StateChangedHandler {
     }
 
     public String getEventState() {
-	return event.getState();
+	return event != null ? event.getState() : null;
     }
 
     @Override

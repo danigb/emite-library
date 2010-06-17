@@ -7,11 +7,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.calclab.emite.core.client.events.MessageTestHandler;
+import com.calclab.emite.core.client.events.StateChangedTestHandler;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
-import com.calclab.emite.im.client.chat.Chat.State;
+import com.calclab.emite.im.client.chat.Chat.ChatState;
 import com.calclab.emite.xtesting.SessionTester;
-import com.calclab.suco.testing.events.MockedListener;
 
 public class ChatTest extends AbstractChatTest {
     private static final XmppURI CHAT_URI = uri("other@domain/other");
@@ -33,38 +34,40 @@ public class ChatTest extends AbstractChatTest {
     @Test
     public void shouldBeReadyIfSessionLogedIn() {
 	final PairChat aChat = new PairChat(session, uri("someone@domain"), USER_URI, null);
-	assertEquals(Chat.State.ready, aChat.getState());
+	assertEquals(ChatState.ready, aChat.getChatState());
     }
 
     @Test
     public void shouldLockIfLogout() {
-	final MockedListener<State> listener = new MockedListener<State>();
-	pairChat.onStateChanged(listener);
+	final StateChangedTestHandler handler = new StateChangedTestHandler();
+	pairChat.addStateChangedHandler(handler);
 	session.logout();
+	assertEquals(ChatState.locked, handler.getEventState());
 	session.login(USER_URI, "");
-	assertTrue(listener.isCalledWithSame(Chat.State.locked, Chat.State.ready));
+	assertEquals(ChatState.ready, handler.getEventState());
     }
 
     @Test
     public void shouldLockIfReLoginWithDifferentJID() {
 	session.logout();
 	session.login(uri("differentUser@domain"), "");
-	assertEquals(Chat.State.locked, pairChat.getState());
+	assertEquals(ChatState.locked, pairChat.getChatState());
 
     }
 
     @Test
     public void shouldReceiveMessages() {
-	final MockedListener<Message> messageReceived = new MockedListener<Message>();
-	pairChat.onMessageReceived(messageReceived);
+	final MessageTestHandler handler = new MessageTestHandler();
+	pairChat.addMessageReceivedHandler(handler);
 	session.receives(new Message(CHAT_URI, USER_URI, "the body"));
-	assertTrue("should receive messages", messageReceived.isCalled(1));
+	assertTrue("should receive messages", handler.hasEvent());
+	assertEquals("the body", handler.getEventMessage().getBody());
     }
 
     @Test
     public void shouldSendNoThreadWhenNotSpecified() {
 	final AbstractChat noThreadChat = new PairChat(session, CHAT_URI, USER_URI, null);
-	noThreadChat.setState(State.ready);
+	noThreadChat.setChatState(ChatState.ready);
 	noThreadChat.send(new Message("the message"));
 	session.verifySent("<message from='self@domain/res' to='other@domain/other' "
 		+ "type='chat'><body>the message</body></message>");
@@ -89,7 +92,7 @@ public class ChatTest extends AbstractChatTest {
     public void shouldUnlockIfReloginWithSameJID() {
 	session.logout();
 	session.login(XmppURI.uri(USER_URI.getNode(), USER_URI.getHost(), "different_resource"), "");
-	assertEquals(Chat.State.ready, pairChat.getState());
+	assertEquals(ChatState.ready, pairChat.getChatState());
     }
 
     @Test

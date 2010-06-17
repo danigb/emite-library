@@ -23,36 +23,65 @@ package com.calclab.emite.im.client.chat;
 
 import java.util.HashMap;
 
+import com.calclab.emite.core.client.events.DefaultEmiteEventBus;
+import com.calclab.emite.core.client.events.MessageEvent;
+import com.calclab.emite.core.client.events.MessageHandler;
+import com.calclab.emite.core.client.events.MessageReceivedEvent;
+import com.calclab.emite.core.client.events.MessageSentEvent;
+import com.calclab.emite.core.client.events.StateChangedEvent;
+import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
-import com.calclab.suco.client.events.Event;
 import com.calclab.suco.client.events.Listener;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 public abstract class AbstractChat implements Chat {
 
     protected final XmppURI uri;
-    protected State state;
-    private final Event<State> onStateChanged;
-    private final Event<Message> onBeforeReceive;
+    protected String state;
     private final XmppSession session;
     private final HashMap<Class<?>, Object> data;
-    private final Event<Message> onMessageSent;
-    private final Event<Message> onMessageReceived;
-    private final Event<Message> onBeforeSend;
     private final XmppURI starter;
+    private final DefaultEmiteEventBus eventBus;
 
     public AbstractChat(final XmppSession session, final XmppURI uri, final XmppURI starter) {
 	this.session = session;
 	this.uri = uri;
 	this.starter = starter;
+	eventBus = new DefaultEmiteEventBus();
 	data = new HashMap<Class<?>, Object>();
-	state = Chat.State.locked;
-	onStateChanged = new Event<State>("chat:onStateChanged");
-	onMessageSent = new Event<Message>("chat:onMessageSent");
-	onMessageReceived = new Event<Message>("chat:onMessageReceived");
-	onBeforeSend = new Event<Message>("chat:onBeforeSend");
-	onBeforeReceive = new Event<Message>("chat:onBeforeReceive");
+	state = ChatState.locked;
+    }
+
+    @Override
+    public HandlerRegistration addBeforeReceiveMessageHandler(final MessageHandler handler) {
+	return eventBus.addHandler(BeforeReceiveMessageEvent.getType(), handler);
+    }
+
+    @Override
+    public HandlerRegistration addBeforeSendMessageHandler(final MessageHandler handler) {
+	return eventBus.addHandler(BeforeSendMessageEvent.getType(), handler);
+    }
+
+    @Override
+    public HandlerRegistration addMessageReceivedHandler(final MessageHandler handler) {
+	return eventBus.addHandler(MessageReceivedEvent.getType(), handler);
+    }
+
+    @Override
+    public HandlerRegistration addMessageSentHandler(final MessageHandler handler) {
+	return eventBus.addHandler(MessageSentEvent.getType(), handler);
+    }
+
+    @Override
+    public HandlerRegistration addStateChangedHandler(final StateChangedHandler handler) {
+	return eventBus.addHandler(StateChangedEvent.getType(), handler);
+    }
+
+    @Override
+    public String getChatState() {
+	return state;
     }
 
     @SuppressWarnings("unchecked")
@@ -60,8 +89,13 @@ public abstract class AbstractChat implements Chat {
 	return (T) data.get(type);
     }
 
+    @Deprecated
     public State getState() {
-	return state;
+	if (state == ChatState.locked) {
+	    return State.locked;
+	} else {
+	    return State.ready;
+	}
     }
 
     public XmppURI getURI() {
@@ -72,31 +106,69 @@ public abstract class AbstractChat implements Chat {
 	return starter.equals(session.getCurrentUser());
     }
 
+    @Deprecated
     public void onBeforeReceive(final Listener<Message> listener) {
-	onBeforeReceive.add(listener);
+	addBeforeReceiveMessageHandler(new MessageHandler() {
+	    @Override
+	    public void onPacketEvent(final MessageEvent event) {
+		listener.onEvent(event.getMessage());
+	    }
+	});
     }
 
+    @Deprecated
     public void onBeforeSend(final Listener<Message> listener) {
-	onBeforeSend.add(listener);
+	addBeforeSendMessageHandler(new MessageHandler() {
+	    @Override
+	    public void onPacketEvent(final MessageEvent event) {
+		listener.onEvent(event.getMessage());
+	    }
+	});
     }
 
+    @Deprecated
     public void onMessageReceived(final Listener<Message> listener) {
-	onMessageReceived.add(listener);
+	addMessageReceivedHandler(new MessageHandler() {
+	    @Override
+	    public void onPacketEvent(final MessageEvent event) {
+		listener.onEvent(event.getMessage());
+	    }
+	});
     }
 
+    @Deprecated
     public void onMessageSent(final Listener<Message> listener) {
-	onMessageSent.add(listener);
+	addMessageSentHandler(new MessageHandler() {
+	    @Override
+	    public void onPacketEvent(final MessageEvent event) {
+		listener.onEvent(event.getMessage());
+	    }
+	});
     }
 
+    @Deprecated
     public void onStateChanged(final Listener<State> listener) {
-	onStateChanged.add(listener);
+	addStateChangedHandler(new StateChangedHandler() {
+	    @Override
+	    public void onStateChanged(final StateChangedEvent event) {
+		listener.onEvent(getState());
+	    }
+	});
     }
 
     public void send(final Message message) {
 	message.setFrom(session.getCurrentUser());
-	onBeforeSend.fire(message);
+	eventBus.fireEvent(new BeforeSendMessageEvent(message));
 	session.send(message);
-	onMessageSent.fire(message);
+	eventBus.fireEvent(new MessageSentEvent(message));
+    }
+
+    @Override
+    public void setChatState(final String state) {
+	if (this.state != state) {
+	    this.state = state;
+	    eventBus.fireEvent(new StateChangedEvent(state));
+	}
     }
 
     @SuppressWarnings("unchecked")
@@ -104,19 +176,17 @@ public abstract class AbstractChat implements Chat {
 	return (T) data.put(type, value);
     }
 
-    protected void fireBeforeReceive(final Message message) {
-	onBeforeReceive.fire(message);
-    }
-
     protected void receive(final Message message) {
-	onBeforeReceive.fire(message);
-	onMessageReceived.fire(message);
+	eventBus.fireEvent(new BeforeReceiveMessageEvent(message));
+	eventBus.fireEvent(new MessageReceivedEvent(message));
     }
 
+    @Deprecated
     protected void setState(final State state) {
-	if (this.state != state) {
-	    this.state = state;
-	    onStateChanged.fire(state);
+	if (State.locked == state) {
+	    setChatState(ChatState.locked);
+	} else {
+	    setChatState(ChatState.ready);
 	}
     }
 }

@@ -3,7 +3,7 @@ package com.calclab.emite.core.client.xmpp.session;
 import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.events.IQEvent;
 import com.calclab.emite.core.client.events.IQHandler;
-import com.calclab.emite.core.client.events.IncomingMessageEvent;
+import com.calclab.emite.core.client.events.MessageReceivedEvent;
 import com.calclab.emite.core.client.events.MessageHandler;
 import com.calclab.emite.core.client.events.PresenceEvent;
 import com.calclab.emite.core.client.events.PresenceHandler;
@@ -30,7 +30,7 @@ public abstract class AbstractXmppSession implements XmppSession {
 
     @Override
     public HandlerRegistration addIncomingMessageHandler(final MessageHandler handler) {
-	return eventBus.addHandler(IncomingMessageEvent.getType(), handler);
+	return eventBus.addHandler(MessageReceivedEvent.getType(), handler);
     }
 
     @Override
@@ -57,7 +57,7 @@ public abstract class AbstractXmppSession implements XmppSession {
     }
 
     protected void fireMessage(final Message message) {
-	eventBus.fireEvent(new IncomingMessageEvent(message));
+	eventBus.fireEvent(new MessageReceivedEvent(message));
     }
 
     protected void firePresence(final Presence presence) {

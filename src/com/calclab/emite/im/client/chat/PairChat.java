@@ -130,10 +130,10 @@ public class PairChat extends AbstractChat {
 	    if (user == null) {
 		user = currentUser;
 	    }
-	    setState(currentUser.equalsNoResource(user) ? State.ready : State.locked);
+	    setChatState(currentUser.equalsNoResource(user) ? ChatState.ready : ChatState.locked);
 
 	} else {
-	    setState(State.locked);
+	    setChatState(ChatState.locked);
 	}
 
     }

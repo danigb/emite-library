@@ -30,7 +30,7 @@ import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.Message.Type;
-import com.calclab.emite.im.client.chat.Chat.State;
+import com.calclab.emite.im.client.chat.Chat.ChatState;
 
 /**
  * Default ChatManager implementation. Use ChatManager interface instead
@@ -52,7 +52,7 @@ public class PairChatManager extends AbstractChatManager implements ChatManager 
 
     @Override
     public void close(final Chat chat) {
-	((AbstractChat) chat).setState(State.locked);
+	chat.setChatState(ChatState.locked);
 	super.close(chat);
     }
 
@@ -80,7 +80,7 @@ public class PairChatManager extends AbstractChatManager implements ChatManager 
     @Override
     protected Chat createChat(final XmppURI toURI, final XmppURI starterURI) {
 	final PairChat pairChat = new PairChat(session, toURI, starterURI, null);
-	pairChat.setState(Chat.State.ready);
+	pairChat.setChatState(ChatState.ready);
 	return pairChat;
     }
 

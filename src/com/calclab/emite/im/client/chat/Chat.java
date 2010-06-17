@@ -21,9 +21,12 @@
  */
 package com.calclab.emite.im.client.chat;
 
+import com.calclab.emite.core.client.events.MessageHandler;
+import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Listener;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * Defines a xmpp chat.
@@ -35,11 +38,65 @@ import com.calclab.suco.client.events.Listener;
 public interface Chat {
 
     /**
+     * Possible (and extensible) chat conversation states
+     */
+    public static class ChatState {
+	public static final String ready = "ready";
+	public static final String locked = "locked";
+    }
+
+    /**
      * Possible conversation states.
      */
+    @Deprecated
     public static enum State {
 	ready, locked
     }
+
+    /**
+     * Add a handler to know when a message is received. It allows the listener
+     * to modify the message just before the receive event (a kind of
+     * interceptor in aop programming)
+     * 
+     * @param handler
+     *            the message handler
+     */
+    public HandlerRegistration addBeforeReceiveMessageHandler(MessageHandler handler);
+
+    /**
+     * A a handler to know when a message is going to be sent. It allows the
+     * listener to modify the message just before send it (a kind of interceptor
+     * in aop programming)
+     * 
+     * @param handler
+     *            the message handeler
+     */
+    public HandlerRegistration addBeforeSendMessageHandler(MessageHandler handler);
+
+    /**
+     * Add a handler to know when a message is received in this chat
+     * 
+     * @param handler
+     * @return a handler registration object to detach the handler
+     */
+    public HandlerRegistration addMessageReceivedHandler(MessageHandler handler);
+
+    /**
+     * Add a handler to know when this chat has sent a message
+     * 
+     * @param handler
+     *            the message handler
+     * @return a handler registration object to detach the handler
+     * 
+     */
+    public HandlerRegistration addMessageSentHandler(MessageHandler handler);
+
+    /**
+     * Get the current chat state
+     * 
+     * @return the current chat state
+     */
+    public String getChatState();
 
     /**
      * Get the associated object of class 'type'
@@ -55,6 +112,11 @@ public interface Chat {
 
     public String getID();
 
+    /**
+     * @see getChatState
+     * @return
+     */
+    @Deprecated
     public State getState();
 
     /**
@@ -81,24 +143,25 @@ public interface Chat {
      * listener to modify the message just before send it (a kind of interceptor
      * in aop programming)
      * 
+     * @see addBeforeSendMessageHandler
      * @param listener
      *            the listener
      */
+    @Deprecated
     public void onBeforeSend(Listener<Message> listener);
 
     /**
-     * Allows to modify the message just before inform about the reception
-     * 
-     * @param messageInterceptor
+     * @see addMessageReceivedHandler
+     * @param listener
      */
+    @Deprecated
     public void onMessageReceived(Listener<Message> listener);
 
     /**
-     * Attach a listener to know when a message has been sent
-     * 
+     * @see addMessageSentHandler
      * @param listener
-     *            the listener to the events
      */
+    @Deprecated
     public void onMessageSent(Listener<Message> listener);
 
     /**
@@ -120,6 +183,14 @@ public interface Chat {
     public void send(Message message);
 
     /**
+     * Changes the current chat state. If will fire a StateChangedEvent
+     * 
+     * @param the
+     *            new state
+     */
+    public void setChatState(String state);
+
+    /**
      * Associate a object to this conversation.
      * 
      * @param <T>
@@ -132,5 +203,14 @@ public interface Chat {
      * @see getData
      */
     public <T> T setData(Class<T> type, T data);
+
+    /**
+     * Add a handler to know when the chat state changes
+     * 
+     * @param handler
+     *            the handler
+     * @return a handle registration object to remove this handler
+     */
+    HandlerRegistration addStateChangedHandler(StateChangedHandler handler);
 
 }

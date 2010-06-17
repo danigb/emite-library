@@ -2,12 +2,22 @@ package com.calclab.emite.core.client.events;
 
 import com.google.gwt.event.shared.GwtEvent;
 
-public abstract class StateChangedEvent extends GwtEvent<StateChangedHandler> {
+public class StateChangedEvent extends GwtEvent<StateChangedHandler> {
 
+    private static final Type<StateChangedHandler> TYPE = new Type<StateChangedHandler>();
+
+    public static Type<StateChangedHandler> getType() {
+	return TYPE;
+    }
     private final String state;
+
     private final Type<StateChangedHandler> type;
 
-    public StateChangedEvent(final Type<StateChangedHandler> type, final String state) {
+    public StateChangedEvent(final String state) {
+	this(TYPE, state);
+    }
+
+    protected StateChangedEvent(final Type<StateChangedHandler> type, final String state) {
 	this.type = type;
 	this.state = state;
     }

@@ -109,7 +109,7 @@ public class Room extends AbstractChat implements Chat {
 		    close();
 		} else if (XmppSession.SessionState.disconnected == state || XmppSession.SessionState.error == state) {
 		    // TODO : add an error/out state ?
-		    setState(State.locked);
+		    setChatState(ChatState.locked);
 		}
 	    }
 	});
@@ -124,9 +124,9 @@ public class Room extends AbstractChat implements Chat {
      * @see http://www.xmpp.org/extensions/xep-0045.html#exit
      */
     public void close() {
-	if (state == State.ready) {
+	if (state == ChatState.ready) {
 	    session.send(new Presence(Type.unavailable, null, getURI()));
-	    setState(State.locked);
+	    setChatState(ChatState.locked);
 	}
     }
 
@@ -182,7 +182,7 @@ public class Room extends AbstractChat implements Chat {
     }
 
     public void reEnter(final HistoryOptions historyOptions) {
-	if (getState() == State.locked) {
+	if (getChatState() == ChatState.locked) {
 	    session.send(createEnterPresence(historyOptions));
 	}
     }
@@ -300,7 +300,7 @@ public class Room extends AbstractChat implements Chat {
 	final Type type = presence.getType();
 	if (type == Type.error || type == Type.unavailable && occupantURI.equals(getURI())) {
 	    // TODO : add an error/out state ?
-	    setState(State.locked);
+	    setChatState(ChatState.locked);
 	} else if (type == Type.unavailable) {
 	    removeOccupant(occupantURI);
 	} else {
@@ -313,8 +313,8 @@ public class Room extends AbstractChat implements Chat {
 		if (isNewRoom(child)) {
 		    requestCreateInstantRoom();
 		} else {
-		    if (state != State.ready) {
-			setState(Chat.State.ready);
+		    if (state != ChatState.ready) {
+			setChatState(ChatState.ready);
 		    }
 		}
 	    }
@@ -337,7 +337,7 @@ public class Room extends AbstractChat implements Chat {
 	//
 	if (message.getType() == com.calclab.emite.core.client.xmpp.stanzas.Message.Type.error) {
 	    GWT.log("Received Error message :" + message);
-	    setState(State.locked);
+	    setChatState(ChatState.locked);
 	}
 	super.receive(message);
     }
@@ -348,7 +348,7 @@ public class Room extends AbstractChat implements Chat {
 	session.sendIQ("rooms", iq, new Listener<IPacket>() {
 	    public void onEvent(final IPacket received) {
 		if (IQ.isSuccess(received)) {
-		    setState(Chat.State.ready);
+		    setChatState(ChatState.ready);
 		}
 	    }
 	});
