@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.calclab.emite.core.client.events.EmiteEventBus;
+import com.calclab.emite.core.client.events.ChangedEvent.ChangeAction;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence.Type;
 import com.calclab.emite.xtesting.SessionTester;
@@ -68,11 +69,11 @@ public class SubscriptionManagerTests {
 
 	// only NONE subscription
 	final RosterItem subscriptedItem = new RosterItem(uri("name@domain"), SubscriptionState.both, "TheName", null);
-	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_ADDED, subscriptedItem));
+	eventBus.fireEvent(new RosterItemChangedEvent(ChangeAction.ADDED, subscriptedItem));
 	session.verifyNotSent("<presence />");
 
 	final RosterItem newItem = new RosterItem(uri("name@domain"), SubscriptionState.none, "TheName", Type.subscribe);
-	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_ADDED, newItem));
+	eventBus.fireEvent(new RosterItemChangedEvent(ChangeAction.ADDED, newItem));
 	session.verifySent("<presence from='user@local' to='name@domain' type='subscribe'/>");
     }
 

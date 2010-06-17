@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import com.calclab.emite.core.client.events.DefaultEmiteEventBus;
+import com.calclab.emite.core.client.events.ChangedEvent.ChangeAction;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Listener;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -48,7 +49,7 @@ public class RosterGroup implements Iterable<RosterItem> {
      */
     public void add(final RosterItem item) {
 	itemsByJID.put(item.getJID(), item);
-	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_ADDED, item));
+	eventBus.fireEvent(new RosterItemChangedEvent(ChangeAction.ADDED, item));
     }
 
     public HandlerRegistration addRosterItemChangedHandler(final RosterItemChangedHandler handler) {
@@ -124,7 +125,7 @@ public class RosterGroup implements Iterable<RosterItem> {
 	addRosterItemChangedHandler(new RosterItemChangedHandler() {
 	    @Override
 	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
-		if (event.is(RosterItemChangedEvent.ITEM_ADDED)) {
+		if (event.is(ChangeAction.ADDED)) {
 		    listener.onEvent(event.getItem());
 		}
 	    }
@@ -135,7 +136,7 @@ public class RosterGroup implements Iterable<RosterItem> {
 	addRosterItemChangedHandler(new RosterItemChangedHandler() {
 	    @Override
 	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
-		if (event.is(RosterItemChangedEvent.ITEM_UPDATED)) {
+		if (event.is(ChangeAction.MODIFIED)) {
 		    listener.onEvent(event.getItem());
 		}
 	    }
@@ -146,7 +147,7 @@ public class RosterGroup implements Iterable<RosterItem> {
 	addRosterItemChangedHandler(new RosterItemChangedHandler() {
 	    @Override
 	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
-		if (event.is(RosterItemChangedEvent.ITEM_REMOVED)) {
+		if (event.is(ChangeAction.REMOVED)) {
 		    listener.onEvent(event.getItem());
 		}
 	    }
@@ -156,13 +157,13 @@ public class RosterGroup implements Iterable<RosterItem> {
     public RosterItem remove(final XmppURI jid) {
 	final RosterItem removed = itemsByJID.remove(jid);
 	if (removed != null) {
-	    eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_REMOVED, removed));
+	    eventBus.fireEvent(new RosterItemChangedEvent(ChangeAction.REMOVED, removed));
 	}
 	return removed;
     }
 
     protected void fireItemChange(final RosterItem item) {
-	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_UPDATED, item));
+	eventBus.fireEvent(new RosterItemChangedEvent(ChangeAction.MODIFIED, item));
     }
 
     void clear() {

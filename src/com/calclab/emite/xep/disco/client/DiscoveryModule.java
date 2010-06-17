@@ -21,6 +21,7 @@
  */
 package com.calclab.emite.xep.disco.client;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.xmpp.session.SessionComponent;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.suco.client.Suco;
@@ -50,7 +51,7 @@ public class DiscoveryModule extends AbstractModule implements EntryPoint {
 	register(SessionComponent.class, new Factory<DiscoveryManager>(DiscoveryManager.class) {
 	    @Override
 	    public DiscoveryManager create() {
-		return new DiscoveryManager($(XmppSession.class));
+		return new DiscoveryManager($(EmiteEventBus.class), $(XmppSession.class));
 	    }
 	});
     }

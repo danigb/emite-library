@@ -44,7 +44,7 @@ public abstract class AbstractChat implements Chat {
     private final XmppSession session;
     private final HashMap<Class<?>, Object> data;
     private final XmppURI starter;
-    private final DefaultEmiteEventBus eventBus;
+    protected final DefaultEmiteEventBus eventBus;
 
     public AbstractChat(final XmppSession session, final XmppURI uri, final XmppURI starter) {
 	this.session = session;

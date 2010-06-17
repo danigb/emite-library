@@ -8,6 +8,7 @@ import java.util.Set;
 import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.events.StateChangedEvent;
 import com.calclab.emite.core.client.events.StateChangedHandler;
+import com.calclab.emite.core.client.events.ChangedEvent.ChangeAction;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Listener;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -97,7 +98,7 @@ public abstract class AbstractRoster implements Roster {
 	addRosterGroupChangedHandler(new RosterGroupChangedHandler() {
 	    @Override
 	    public void onRosterGroupChanged(final RosterGroupChangedEvent event) {
-		if (event.is(RosterGroupChangedEvent.GROUP_ADDED)) {
+		if (event.wasAdded()) {
 		    listener.onEvent(event.getGroup());
 		}
 	    }
@@ -109,7 +110,7 @@ public abstract class AbstractRoster implements Roster {
 	addRosterGroupChangedHandler(new RosterGroupChangedHandler() {
 	    @Override
 	    public void onRosterGroupChanged(final RosterGroupChangedEvent event) {
-		if (event.is(RosterGroupChangedEvent.GROUP_REMOVED)) {
+		if (event.wasRemoved()) {
 		    listener.onEvent(event.getGroup());
 		}
 	    }
@@ -120,7 +121,7 @@ public abstract class AbstractRoster implements Roster {
 	addRosterItemChangedHandler(new RosterItemChangedHandler() {
 	    @Override
 	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
-		if (event.is(RosterItemChangedEvent.ITEM_ADDED)) {
+		if (event.wasAdded()) {
 		    listener.onEvent(event.getItem());
 		}
 	    }
@@ -131,7 +132,7 @@ public abstract class AbstractRoster implements Roster {
 	addRosterItemChangedHandler(new RosterItemChangedHandler() {
 	    @Override
 	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
-		if (event.is(RosterItemChangedEvent.ITEM_UPDATED)) {
+		if (event.wasModified()) {
 		    listener.onEvent(event.getItem());
 		}
 	    }
@@ -142,7 +143,7 @@ public abstract class AbstractRoster implements Roster {
 	addRosterItemChangedHandler(new RosterItemChangedHandler() {
 	    @Override
 	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
-		if (event.is(RosterItemChangedEvent.ITEM_REMOVED)) {
+		if (event.wasRemoved()) {
 		    listener.onEvent(event.getItem());
 		}
 	    }
@@ -186,19 +187,19 @@ public abstract class AbstractRoster implements Roster {
     }
 
     protected void fireGroupAdded(final RosterGroup group) {
-	eventBus.fireEvent(new RosterGroupChangedEvent(RosterGroupChangedEvent.GROUP_ADDED, group));
+	eventBus.fireEvent(new RosterGroupChangedEvent(ChangeAction.ADDED, group));
     }
 
     protected void fireGroupRemoved(final RosterGroup group) {
-	eventBus.fireEvent(new RosterGroupChangedEvent(RosterGroupChangedEvent.GROUP_REMOVED, group));
+	eventBus.fireEvent(new RosterGroupChangedEvent(ChangeAction.REMOVED, group));
     }
 
     protected void fireItemAdded(final RosterItem item) {
-	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_ADDED, item));
+	eventBus.fireEvent(new RosterItemChangedEvent(ChangeAction.ADDED, item));
     }
 
     protected void fireItemChanged(final RosterItem item) {
-	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_UPDATED, item));
+	eventBus.fireEvent(new RosterItemChangedEvent(ChangeAction.MODIFIED, item));
 	all.fireItemChange(item);
 	for (final String name : item.getGroups()) {
 	    getRosterGroup(name).fireItemChange(item);
@@ -206,7 +207,7 @@ public abstract class AbstractRoster implements Roster {
     }
 
     protected void fireItemRemoved(final RosterItem item) {
-	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_REMOVED, item));
+	eventBus.fireEvent(new RosterItemChangedEvent(ChangeAction.REMOVED, item));
     }
 
     protected void fireRosterReady(final Collection<RosterItem> collection) {
