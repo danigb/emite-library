@@ -114,7 +114,7 @@ public class Room extends AbstractChat implements Chat {
      *            the handler
      * @return a handler registration object to detach the handler
      */
-    public HandlerRegistration addRoomInvitationSentHandler(final RoomInvitationSentHandler handler) {
+    public HandlerRegistration addRoomInvitationSentHandler(final RoomInvitationHandler handler) {
 	return eventBus.addHandler(RoomInvitationSentEvent.getType(), handler);
     }
 
@@ -244,10 +244,11 @@ public class Room extends AbstractChat implements Chat {
      */
     @Deprecated
     public void onInvitationSent(final Listener2<XmppURI, String> listener) {
-	addRoomInvitationSentHandler(new RoomInvitationSentHandler() {
+	addRoomInvitationSentHandler(new RoomInvitationHandler() {
 	    @Override
-	    public void onRoomInvitationSent(final RoomInvitationSentEvent event) {
-		listener.onEvent(event.getInvitedJid(), event.getReasonText());
+	    public void onRoomInvitation(final RoomInvitationEvent event) {
+		final RoomInvitation invitation = event.getRoomInvitation();
+		listener.onEvent(invitation.getInvited(), invitation.getReason());
 	    }
 	});
     }
@@ -331,7 +332,8 @@ public class Room extends AbstractChat implements Chat {
 	final IPacket reason = invite.addChild("reason", null);
 	reason.setText(reasonText);
 	session.send(message);
-	eventBus.fireEvent(new RoomInvitationSentEvent(userJid, reasonText));
+	eventBus.fireEvent(new RoomInvitationSentEvent(new RoomInvitation(session.getCurrentUser(), userJid, uri,
+		reasonText)));
     }
 
     public Occupant setOccupantPresence(final XmppURI uri, final String affiliation, final String role,

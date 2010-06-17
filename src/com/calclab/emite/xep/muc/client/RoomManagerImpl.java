@@ -35,9 +35,9 @@ import com.calclab.emite.core.client.xmpp.stanzas.Stanza;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.im.client.chat.Chat;
 import com.calclab.emite.im.client.chat.PairChatManager;
-import com.calclab.suco.client.events.Event;
 import com.calclab.suco.client.events.Listener;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 public class RoomManagerImpl extends PairChatManager implements RoomManager {
 
@@ -45,14 +45,11 @@ public class RoomManagerImpl extends PairChatManager implements RoomManager {
 	    "http://jabber.org/protocol/muc#user");
     private static final PacketMatcher FILTER_INVITE = MatcherFactory.byName("invite");
     private final HashMap<XmppURI, Room> roomsByJID;
-    private final Event<RoomInvitation> onInvitationReceived;
     private HistoryOptions defaultHistoryOptions;
 
     public RoomManagerImpl(final EmiteEventBus eventBus, final XmppSession session) {
 	super(eventBus, session);
-	onInvitationReceived = new Event<RoomInvitation>("roomManager:onInvitationReceived");
 	roomsByJID = new HashMap<XmppURI, Room>();
-
     }
 
     @Override
@@ -60,6 +57,11 @@ public class RoomManagerImpl extends PairChatManager implements RoomManager {
 	final XmppURI roomURI = invitation.getRoomURI();
 	final XmppURI uri = XmppURI.uri(roomURI.getNode(), roomURI.getHost(), session.getCurrentUser().getNode());
 	open(uri);
+    }
+
+    @Override
+    public HandlerRegistration addRoomInvitationReceievedHandler(final RoomInvitationHandler handler) {
+	return eventBus.addHandler(RoomInvitationReceievedEvent.getType(), handler);
     }
 
     @Override
@@ -81,7 +83,7 @@ public class RoomManagerImpl extends PairChatManager implements RoomManager {
     }
 
     public void onInvitationReceived(final Listener<RoomInvitation> listener) {
-	onInvitationReceived.add(listener);
+
     }
 
     @Override
@@ -100,11 +102,6 @@ public class RoomManagerImpl extends PairChatManager implements RoomManager {
 
     public void setDefaultHistoryOptions(final HistoryOptions defaultHistoryOptions) {
 	this.defaultHistoryOptions = defaultHistoryOptions;
-    }
-
-    private void handleRoomInvitation(final XmppURI roomURI, final Stanza invitation) {
-	onInvitationReceived.fire(new RoomInvitation(invitation.getFrom(), roomURI, invitation.getFirstChild("reason")
-		.getText()));
     }
 
     @Override
@@ -128,7 +125,10 @@ public class RoomManagerImpl extends PairChatManager implements RoomManager {
 		room.receive(message);
 	    }
 	} else if ((child = message.getFirstChild(FILTER_X).getFirstChild(FILTER_INVITE)) != NoPacket.INSTANCE) {
-	    handleRoomInvitation(message.getFrom(), new BasicStanza(child));
+	    final Stanza invitation = new BasicStanza(child);
+	    final RoomInvitation roomInvitation = new RoomInvitation(invitation.getFrom(), session.getCurrentUser(),
+		    message.getFrom(), invitation.getFirstChild("reason").getText());
+	    eventBus.fireEvent(new RoomInvitationReceievedEvent(roomInvitation));
 	}
 
     }

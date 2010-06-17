@@ -30,7 +30,7 @@ public class RoomManagerTest extends AbstractChatManagerTest {
 	final String reason = "theReason";
 	final XmppURI invitor = uri("friend@host/resource");
 	final XmppURI roomURI = uri("room@room.service");
-	rooms.acceptRoomInvitation(new RoomInvitation(invitor, roomURI, reason));
+	rooms.acceptRoomInvitation(new RoomInvitation(invitor, MYSELF, roomURI, reason));
 	assertTrue(chatCreatedListener.isCalledOnce());
 	final Chat room = chatCreatedListener.getValue(0);
 	assertEquals("room@room.service/self", room.getURI().toString());

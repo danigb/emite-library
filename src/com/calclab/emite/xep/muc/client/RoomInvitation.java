@@ -27,22 +27,40 @@ public class RoomInvitation {
     private final XmppURI invitor;
     private final XmppURI roomURI;
     private final String reason;
+    private final XmppURI invited;
 
-    public RoomInvitation(final XmppURI invitor, final XmppURI roomURI, final String reason) {
-        this.invitor = invitor;
-        this.roomURI = roomURI;
-        this.reason = reason;
+    /**
+     * Create a new room invitation
+     * 
+     * @param invitor
+     *            the uri of the one who created the invitation
+     * @param invited
+     *            the jid of the person being invited
+     * @param roomURI
+     *            the uri of the room
+     * @param reason
+     *            a text explaining the invitation
+     */
+    public RoomInvitation(final XmppURI invitor, final XmppURI invited, final XmppURI roomURI, final String reason) {
+	this.invitor = invitor;
+	this.invited = invited;
+	this.roomURI = roomURI;
+	this.reason = reason;
+    }
+
+    public XmppURI getInvited() {
+	return invited;
     }
 
     public XmppURI getInvitor() {
-        return invitor;
+	return invitor;
     }
 
     public String getReason() {
-        return reason;
+	return reason;
     }
 
     public XmppURI getRoomURI() {
-        return roomURI;
+	return roomURI;
     }
 }

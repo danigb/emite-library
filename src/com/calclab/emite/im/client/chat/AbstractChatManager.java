@@ -13,7 +13,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 public abstract class AbstractChatManager implements ChatManager {
     private final HashSet<Chat> chats;
     protected final XmppSession session;
-    private final EmiteEventBus eventBus;
+    protected final EmiteEventBus eventBus;
 
     public AbstractChatManager(final EmiteEventBus eventBus, final XmppSession session) {
 	this.eventBus = eventBus;

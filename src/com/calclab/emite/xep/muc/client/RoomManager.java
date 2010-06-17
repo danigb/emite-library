@@ -24,14 +24,40 @@ package com.calclab.emite.xep.muc.client;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.im.client.chat.ChatManager;
 import com.calclab.suco.client.events.Listener;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
- * RoomManager: room related methods
+ * RoomManager: a ChatManager extended with room related methods. All the XXChat
+ * methods inherit from ChatManager are Rooms in the RoomManager context.
  * 
  * @see ChatManager
  */
 public interface RoomManager extends ChatManager {
+    /**
+     * Accept a room invitation. A new room is created (use addChatOpenHandler
+     * to know when the room is created)
+     * 
+     * @param invitation
+     *            the invitation to be accepted
+     */
     void acceptRoomInvitation(RoomInvitation invitation);
+
+    /**
+     * Add a handler to know when a room invitation has arrived. Use the
+     * acceptRoomInvitation to enter the room
+     * 
+     * @param handler
+     *            the handler
+     * @return a handler registration object to detach the handler.
+     */
+    HandlerRegistration addRoomInvitationReceievedHandler(RoomInvitationHandler handler);
+
+    /**
+     * Obtain the history options
+     * 
+     * @return
+     */
+    HistoryOptions getDefaultHistoryOptions();
 
     /**
      * Notify when a room invitation arrives
@@ -41,10 +67,22 @@ public interface RoomManager extends ChatManager {
      */
     void onInvitationReceived(Listener<RoomInvitation> listener);
 
+    /**
+     * Open a new room (chat) with the given history options
+     * 
+     * @param uri
+     *            the uri of the room to be open
+     * @param historyOptions
+     *            the history options to initialize this room
+     * @return the opened room
+     */
     Room open(final XmppURI uri, HistoryOptions historyOptions);
 
-    HistoryOptions getDefaultHistoryOptions();
-
+    /**
+     * Change the default history options
+     * 
+     * @param historyOptions
+     */
     void setDefaultHistoryOptions(HistoryOptions historyOptions);
 
 }
