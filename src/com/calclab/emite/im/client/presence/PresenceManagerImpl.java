@@ -61,7 +61,7 @@ public class PresenceManagerImpl extends AbstractPresenceManager {
 
 	session.addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final PresenceEvent event) {
+	    public void onPresence(final PresenceEvent event) {
 		final Presence presence = event.getPresence();
 		final Type type = presence.getType();
 		if (type == Type.probe) {

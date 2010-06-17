@@ -64,7 +64,7 @@ public class VCardManagerTests {
     @Before
     public void setup() {
 	session = new SessionTester("test@domain");
-	manager = new VCardManager(session);
+	manager = new VCardManager(session.getEventBus(), session);
     }
 
     @Test

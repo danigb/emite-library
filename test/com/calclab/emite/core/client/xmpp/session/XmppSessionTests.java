@@ -19,7 +19,6 @@ import com.calclab.emite.core.client.events.MessageEvent;
 import com.calclab.emite.core.client.events.MessageHandler;
 import com.calclab.emite.core.client.events.PresenceEvent;
 import com.calclab.emite.core.client.events.PresenceHandler;
-import com.calclab.emite.core.client.events.StateChangedTestHandler;
 import com.calclab.emite.core.client.packet.IPacket;
 import com.calclab.emite.core.client.packet.Packet;
 import com.calclab.emite.core.client.xmpp.resource.ResourceBindResultEvent;
@@ -30,6 +29,7 @@ import com.calclab.emite.core.client.xmpp.session.XmppSession.SessionState;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.xtesting.ConnectionTester;
+import com.calclab.emite.xtesting.handlers.StateChangedTestHandler;
 
 public class XmppSessionTests {
     private DefaultXmppSession session;
@@ -76,7 +76,7 @@ public class XmppSessionTests {
 	incomingPacket = null;
 	session.addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final PresenceEvent event) {
+	    public void onPresence(final PresenceEvent event) {
 		incomingPacket = event.getPresence();
 	    }
 	});
@@ -101,8 +101,8 @@ public class XmppSessionTests {
 
     @Test
     public void shouldHandleSucceedAuthorizationResult() {
-	eventBus.fireEvent(new AuthorizationResultEvent(
-		new Credentials(uri("node@domain"), "pass", Credentials.ENCODING_NONE)));
+	eventBus.fireEvent(new AuthorizationResultEvent(new Credentials(uri("node@domain"), "pass",
+		Credentials.ENCODING_NONE)));
 
 	assertEquals(SessionState.authorized, session.getSessionState());
 	assertTrue(connection.isStreamRestarted());
@@ -127,7 +127,6 @@ public class XmppSessionTests {
 	assertEquals(1, connection.getSentSize());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void shouldRequestSessionWhenBinded() {
 	final XmppURI uri = uri("name@domain/resource");

@@ -51,7 +51,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
 	session.addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final PresenceEvent event) {
+	    public void onPresence(final PresenceEvent event) {
 		final Presence presence = event.getPresence();
 		{
 		    if (presence.getType() == Type.subscribe) {

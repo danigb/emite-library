@@ -69,7 +69,7 @@ public abstract class AbstractSession extends AbstractXmppSession implements Ses
     public void onPresence(final Listener<Presence> listener) {
 	addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final PresenceEvent event) {
+	    public void onPresence(final PresenceEvent event) {
 		listener.onEvent(event.getPresence());
 	    }
 	});

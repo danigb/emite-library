@@ -80,7 +80,7 @@ public class Room extends AbstractChat implements Chat {
 
 	session.addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final PresenceEvent event) {
+	    public void onPresence(final PresenceEvent event) {
 		final Presence presence = event.getPresence();
 		final XmppURI occupantURI = presence.getFrom();
 		if (roomURI.equalsNoResource(occupantURI)) {
@@ -116,61 +116,6 @@ public class Room extends AbstractChat implements Chat {
      */
     public HandlerRegistration addRoomInvitationSentHandler(final RoomInvitationHandler handler) {
 	return eventBus.addHandler(RoomInvitationSentEvent.getType(), handler);
-    }
-
-    /**
-     * Add a handler to know when a room occupant has been added to this room
-     * 
-     * @param handler
-     *            the handler
-     * @return a handler registration object to detach the handler
-     */
-    public HandlerRegistration addRoomOccupantAddedHandler(final RoomOccupantsChangedHandler handler) {
-	return addRoomOccupantsChangedHandler(new RoomOccupantsChangedHandler() {
-	    @Override
-	    public void onRoomOccupantsChanged(final RoomOccupantsChangedEvent event) {
-		if (event.isAdded()) {
-		    handler.onRoomOccupantsChanged(event);
-		}
-	    }
-	});
-    }
-
-    /**
-     * Add a handler to know when a room occupant has been modified
-     * 
-     * @param handler
-     *            the handler
-     * @return a handler registration object to detach the handler
-     */
-    public HandlerRegistration addRoomOccupantModifiedHandler(final RoomOccupantsChangedHandler handler) {
-	return addRoomOccupantsChangedHandler(new RoomOccupantsChangedHandler() {
-	    @Override
-	    public void onRoomOccupantsChanged(final RoomOccupantsChangedEvent event) {
-		if (event.isModified()) {
-		    handler.onRoomOccupantsChanged(event);
-		}
-	    }
-	});
-    }
-
-    /**
-     * Add a handler to know when a room occupant has been removed from this
-     * room
-     * 
-     * @param handler
-     *            the handler
-     * @return a handler registration object to detach the handler
-     */
-    public HandlerRegistration addRoomOccupantRemovedHandler(final RoomOccupantsChangedHandler handler) {
-	return addRoomOccupantsChangedHandler(new RoomOccupantsChangedHandler() {
-	    @Override
-	    public void onRoomOccupantsChanged(final RoomOccupantsChangedEvent event) {
-		if (event.isRemoved()) {
-		    handler.onRoomOccupantsChanged(event);
-		}
-	    }
-	});
     }
 
     /**
@@ -255,30 +200,36 @@ public class Room extends AbstractChat implements Chat {
 
     @Deprecated
     public void onOccupantAdded(final Listener<Occupant> listener) {
-	addRoomOccupantAddedHandler(new RoomOccupantsChangedHandler() {
+	addRoomOccupantsChangedHandler(new RoomOccupantsChangedHandler() {
 	    @Override
 	    public void onRoomOccupantsChanged(final RoomOccupantsChangedEvent event) {
-		listener.onEvent(event.getOccupant());
+		if (event.isAdded()) {
+		    listener.onEvent(event.getOccupant());
+		}
 	    }
 	});
     }
 
     @Deprecated
     public void onOccupantModified(final Listener<Occupant> listener) {
-	addRoomOccupantModifiedHandler(new RoomOccupantsChangedHandler() {
+	addRoomOccupantsChangedHandler(new RoomOccupantsChangedHandler() {
 	    @Override
 	    public void onRoomOccupantsChanged(final RoomOccupantsChangedEvent event) {
-		listener.onEvent(event.getOccupant());
+		if (event.isModified()) {
+		    listener.onEvent(event.getOccupant());
+		}
 	    }
 	});
     }
 
     @Deprecated
     public void onOccupantRemoved(final Listener<Occupant> listener) {
-	addRoomOccupantRemovedHandler(new RoomOccupantsChangedHandler() {
+	addRoomOccupantsChangedHandler(new RoomOccupantsChangedHandler() {
 	    @Override
 	    public void onRoomOccupantsChanged(final RoomOccupantsChangedEvent event) {
-		listener.onEvent(event.getOccupant());
+		if (event.isRemoved()) {
+		    listener.onEvent(event.getOccupant());
+		}
 	    }
 	});
     }

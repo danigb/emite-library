@@ -31,6 +31,6 @@ public abstract class PresenceEvent extends GwtEvent<PresenceHandler> {
 
     @Override
     protected void dispatch(final PresenceHandler handler) {
-	handler.onIncomingPresence(this);
+	handler.onPresence(this);
     }
 }

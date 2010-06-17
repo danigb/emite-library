@@ -83,7 +83,7 @@ public class ExampleXmppSession implements EntryPoint {
 	     */
 	    session.addIncomingPresenceHandler(new PresenceHandler() {
 		@Override
-		public void onIncomingPresence(final PresenceEvent event) {
+		public void onPresence(final PresenceEvent event) {
 		    final Presence presence = event.getPresence();
 		    log("Presence received from " + presence.getFrom() + ": " + presence.toString());
 		}

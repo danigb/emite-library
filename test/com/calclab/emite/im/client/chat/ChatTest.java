@@ -7,12 +7,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.calclab.emite.core.client.events.MessageTestHandler;
-import com.calclab.emite.core.client.events.StateChangedTestHandler;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.im.client.chat.Chat.ChatState;
 import com.calclab.emite.xtesting.SessionTester;
+import com.calclab.emite.xtesting.handlers.MessageTestHandler;
+import com.calclab.emite.xtesting.handlers.StateChangedTestHandler;
 
 public class ChatTest extends AbstractChatTest {
     private static final XmppURI CHAT_URI = uri("other@domain/other");

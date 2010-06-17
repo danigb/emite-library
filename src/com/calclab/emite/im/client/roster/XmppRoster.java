@@ -69,7 +69,7 @@ public class XmppRoster extends AbstractRoster implements Roster {
 
 	session.addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final PresenceEvent event) {
+	    public void onPresence(final PresenceEvent event) {
 		final Presence presence = event.getPresence();
 		final RosterItem item = getItemByJID(presence.getFrom());
 		if (item != null) {

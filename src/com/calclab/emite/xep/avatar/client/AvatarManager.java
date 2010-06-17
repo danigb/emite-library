@@ -57,7 +57,7 @@ public class AvatarManager {
 
 	session.addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final PresenceEvent event) {
+	    public void onPresence(final PresenceEvent event) {
 		final Presence presence = event.getPresence();
 		final List<? extends IPacket> children = presence.getChildren(FILTER_X);
 		for (final IPacket child : children) {
@@ -99,7 +99,7 @@ public class AvatarManager {
     public void onHashPresenceReceived(final Listener<Presence> listener) {
 	addIncomingHashPresenceHandler(new PresenceHandler() {
 	    @Override
-	    public void onIncomingPresence(final PresenceEvent event) {
+	    public void onPresence(final PresenceEvent event) {
 		listener.onEvent(event.getPresence());
 	    }
 	});

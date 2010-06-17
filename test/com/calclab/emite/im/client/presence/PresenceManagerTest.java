@@ -15,7 +15,7 @@ import com.calclab.emite.core.client.xmpp.stanzas.Presence.Type;
 import com.calclab.emite.im.client.roster.RosterStateChangedEvent;
 import com.calclab.emite.im.client.roster.Roster.RosterState;
 import com.calclab.emite.xtesting.SessionTester;
-import com.calclab.suco.testing.events.MockedListener;
+import com.calclab.emite.xtesting.handlers.PresenceTestHandler;
 
 public class PresenceManagerTest {
 
@@ -43,12 +43,14 @@ public class PresenceManagerTest {
     @Test
     public void shouldEventOwnPresence() {
 	session.setLoggedIn(uri("myself@domain"));
-	final MockedListener<Presence> listener = new MockedListener<Presence>();
-	manager.onOwnPresenceChanged(listener);
+
+	final PresenceTestHandler handler = new PresenceTestHandler();
+	manager.addOwnPresenceChangedHandler(handler);
+
 	manager.changeOwnPresence(Presence.build("status", Show.away));
-	assertTrue(listener.isCalledOnce());
-	assertEquals("status", listener.getValue(0).getStatus());
-	assertEquals(Show.away, listener.getValue(0).getShow());
+	assertTrue(handler.hasEvent());
+	assertEquals("status", handler.getPresence().getStatus());
+	assertEquals(Show.away, handler.getPresence().getShow());
     }
 
     @Test
@@ -72,7 +74,6 @@ public class PresenceManagerTest {
 	session.verifySent("<presence from='myself@domain' type='unavailable' />");
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void shouldSendInitialPresenceAfterRosterReady() {
 	session.setLoggedIn(uri("myself@domain"));

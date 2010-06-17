@@ -9,7 +9,7 @@ import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.im.client.chat.Chat;
 import com.calclab.emite.im.client.chat.PairChatManager;
-import com.calclab.emite.xep.chatstate.client.ChatStateManager.ChatState;
+import com.calclab.emite.xep.chatstate.client.ChatStateManager.ChatUserState;
 import com.calclab.emite.xtesting.SessionTester;
 
 public class ChatStateManagerTests {
@@ -41,9 +41,9 @@ public class ChatStateManagerTests {
     public void shouldNotRepiteState() {
 	session.receives("<message from='other@domain/other' to='self@domain/res' type='chat'>"
 		+ "<active xmlns='http://jabber.org/protocol/chatstates'/></message>");
-	chatStateManager.setOwnState(ChatState.composing);
-	chatStateManager.setOwnState(ChatState.composing);
-	chatStateManager.setOwnState(ChatState.composing);
+	chatStateManager.setOwnChatUserState(ChatUserState.composing);
+	chatStateManager.setOwnChatUserState(ChatUserState.composing);
+	chatStateManager.setOwnChatUserState(ChatUserState.composing);
 	session.verifySent("<message from='self@domain/res' to='other@domain/other' type='chat'>"
 		+ "<composing xmlns='http://jabber.org/protocol/chatstates'/></message>");
 	session.verifyNotSent("<message><composing/><active/></message>");
@@ -51,7 +51,7 @@ public class ChatStateManagerTests {
 
     @Test
     public void shouldNotSendStateIfNegotiationNotAccepted() {
-	chatStateManager.setOwnState(ChatState.composing);
+	chatStateManager.setOwnChatUserState(ChatUserState.composing);
 	session.verifySentNothing();
     }
 
@@ -67,7 +67,7 @@ public class ChatStateManagerTests {
     public void shouldSendStateIfNegotiationAccepted() {
 	session.receives("<message from='other@domain/other' to='self@domain/res' type='chat'>"
 		+ "<active xmlns='http://jabber.org/protocol/chatstates'/></message>");
-	chatStateManager.setOwnState(ChatState.composing);
+	chatStateManager.setOwnChatUserState(ChatUserState.composing);
 	session.verifySent("<message from='self@domain/res' to='other@domain/other' type='chat'>"
 		+ "<composing xmlns='http://jabber.org/protocol/chatstates'/></message>");
     }
@@ -76,8 +76,8 @@ public class ChatStateManagerTests {
     public void shouldSendTwoStateIfDiferent() {
 	session.receives("<message from='other@domain/other' to='self@domain/res' type='chat'>"
 		+ "<active xmlns='http://jabber.org/protocol/chatstates'/></message>");
-	chatStateManager.setOwnState(ChatState.composing);
-	chatStateManager.setOwnState(ChatState.pause);
+	chatStateManager.setOwnChatUserState(ChatUserState.composing);
+	chatStateManager.setOwnChatUserState(ChatUserState.pause);
 	session.verifySent("<message from='self@domain/res' to='other@domain/other' type='chat'>"
 		+ "<composing xmlns='http://jabber.org/protocol/chatstates'/></message>"
 		+ "<message from='self@domain/res' to='other@domain/other' type='chat'>"
@@ -90,8 +90,8 @@ public class ChatStateManagerTests {
 	session.receives("<message from='other@domain/other' to='self@domain/res' type='chat'>"
 		+ "<active xmlns='http://jabber.org/protocol/chatstates'/></message>");
 	final Message message = new Message(MYSELF, OTHER, "test message");
-	message.addChild(ChatStateManager.ChatState.active.toString(), ChatStateManager.XMLNS);
-	chatStateManager.setOwnState(ChatStateManager.ChatState.composing);
+	message.addChild(ChatUserState.active.toString(), ChatStateManager.XMLNS);
+	chatStateManager.setOwnChatUserState(ChatStateManager.ChatUserState.composing);
 	session.verifySent(message.toString() + "<message from='self@domain/res' to='other@domain/other' type='chat'>"
 		+ "<composing xmlns='http://jabber.org/protocol/chatstates'/></message>");
     }
@@ -118,8 +118,8 @@ public class ChatStateManagerTests {
 		.receives("<message from='other@domain/other' to='self@domain/res' type='chat'><active xmlns='http://jabber.org/protocol/chatstates' /></message>");
 	session
 		.receives("<message from='other@domain/other' to='self@domain/res' type='chat'><gone xmlns='http://jabber.org/protocol/chatstates' /></message>");
-	chatStateManager.setOwnState(ChatStateManager.ChatState.composing);
-	chatStateManager.setOwnState(ChatStateManager.ChatState.pause);
+	chatStateManager.setOwnChatUserState(ChatStateManager.ChatUserState.composing);
+	chatStateManager.setOwnChatUserState(ChatStateManager.ChatUserState.pause);
 	session.verifySent("<message><active /></message>");
 	session.verifyNotSent("<message><composing /></message>");
 	session.verifyNotSent("<message><pause /></message>");

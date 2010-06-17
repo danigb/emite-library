@@ -3,12 +3,15 @@ package com.calclab.emite.xxamples.im.chat.client;
 import static com.calclab.emite.core.client.xmpp.stanzas.XmppURI.uri;
 
 import com.calclab.emite.browser.client.PageAssist;
-import com.calclab.emite.core.client.xmpp.session.Session;
+import com.calclab.emite.core.client.events.MessageEvent;
+import com.calclab.emite.core.client.events.MessageHandler;
+import com.calclab.emite.core.client.events.StateChangedEvent;
+import com.calclab.emite.core.client.events.StateChangedHandler;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Message;
 import com.calclab.emite.im.client.chat.Chat;
 import com.calclab.emite.im.client.chat.ChatManager;
 import com.calclab.suco.client.Suco;
-import com.calclab.suco.client.events.Listener;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -33,12 +36,14 @@ public class ExampleIMChat implements EntryPoint {
 	final String user = PageAssist.getMeta("emite.chat");
 	log("Chat with user: " + user);
 
-	final Session session = Suco.get(Session.class);
-	session.onStateChanged(new Listener<Session>() {
+	final XmppSession session = Suco.get(XmppSession.class);
+
+	session.addSessionStateChangedHandler(new StateChangedHandler() {
 	    @Override
-	    public void onEvent(final Session session) {
+	    public void onStateChanged(final StateChangedEvent event) {
 		final String state = session.getSessionState();
 		log("Current state: " + state);
+
 	    }
 	});
 
@@ -55,10 +60,11 @@ public class ExampleIMChat implements EntryPoint {
 	});
 
 	final Chat chat = chatManager.open(uri(user));
-	chat.onMessageReceived(new Listener<Message>() {
+
+	chat.addMessageReceivedHandler(new MessageHandler() {
 	    @Override
-	    public void onEvent(final Message msg) {
-		log("Message received: " + msg.getBody());
+	    public void onPacketEvent(final MessageEvent event) {
+		log("Message received: " + event.getMessage().getBody());
 	    }
 	});
 

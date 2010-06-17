@@ -5,13 +5,12 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.xtesting.SessionTester;
-import com.calclab.suco.client.events.Listener;
+import com.calclab.emite.xtesting.handlers.PresenceTestHandler;
 import com.calclab.suco.testing.events.MockedListener;
 
 public class AvatarManagerTest {
@@ -26,15 +25,16 @@ public class AvatarManagerTest {
 	avatarManager = new AvatarManager(eventBus, session);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void managerShouldListenPresenceWithPhoto() {
-	final Listener<Presence> listener = Mockito.mock(Listener.class);
-	avatarManager.onHashPresenceReceived(listener);
+
+	final PresenceTestHandler handler = new PresenceTestHandler();
+	avatarManager.addIncomingHashPresenceHandler(handler);
+
 	final Presence presence = new Presence(XmppURI.uri("juliet@capulet.com/balcony"));
 	presence.addChild("x", "vcard-temp:x:update").addChild("photo", null).setText("sha1-hash-of-image");
 	session.receives(presence);
-	Mockito.verify(listener).onEvent(presence);
+	assertTrue(handler.isCalledOnce());
     }
 
     @Test

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 import com.google.gwt.core.client.GWT;
 
+@Deprecated
 public class Event0 {
     private ArrayList<Listener0> listeners;
     private final String id;
@@ -36,7 +37,7 @@ public class Event0 {
 
     public void add(final Listener0 listener) {
 	if (listeners == null) {
-	    this.listeners = new ArrayList<Listener0>();
+	    listeners = new ArrayList<Listener0>();
 	}
 	listeners.add(listener);
     }
