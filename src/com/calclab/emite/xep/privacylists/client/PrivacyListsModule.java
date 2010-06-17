@@ -21,8 +21,8 @@
  */
 package com.calclab.emite.xep.privacylists.client;
 
-import com.calclab.emite.core.client.xmpp.session.Session;
 import com.calclab.emite.core.client.xmpp.session.SessionComponent;
+import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.suco.client.Suco;
 import com.calclab.suco.client.ioc.module.AbstractModule;
 import com.calclab.suco.client.ioc.module.Factory;
@@ -46,7 +46,7 @@ public class PrivacyListsModule extends AbstractModule implements EntryPoint {
 	register(SessionComponent.class, new Factory<PrivacyListsManager>(PrivacyListsManager.class) {
 	    @Override
 	    public PrivacyListsManager create() {
-		return new PrivacyListsManager($(Session.class));
+		return new PrivacyListsManager($(XmppSession.class));
 	    }
 	});
     }

@@ -98,7 +98,7 @@ public abstract class AbstractRoster implements Roster {
 	addRosterGroupChangedHandler(new RosterGroupChangedHandler() {
 	    @Override
 	    public void onRosterGroupChanged(final RosterGroupChangedEvent event) {
-		if (event.wasAdded()) {
+		if (event.isAdded()) {
 		    listener.onEvent(event.getGroup());
 		}
 	    }
@@ -110,7 +110,7 @@ public abstract class AbstractRoster implements Roster {
 	addRosterGroupChangedHandler(new RosterGroupChangedHandler() {
 	    @Override
 	    public void onRosterGroupChanged(final RosterGroupChangedEvent event) {
-		if (event.wasRemoved()) {
+		if (event.isRemoved()) {
 		    listener.onEvent(event.getGroup());
 		}
 	    }
@@ -121,7 +121,7 @@ public abstract class AbstractRoster implements Roster {
 	addRosterItemChangedHandler(new RosterItemChangedHandler() {
 	    @Override
 	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
-		if (event.wasAdded()) {
+		if (event.isAdded()) {
 		    listener.onEvent(event.getItem());
 		}
 	    }
@@ -132,7 +132,7 @@ public abstract class AbstractRoster implements Roster {
 	addRosterItemChangedHandler(new RosterItemChangedHandler() {
 	    @Override
 	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
-		if (event.wasModified()) {
+		if (event.isModified()) {
 		    listener.onEvent(event.getItem());
 		}
 	    }
@@ -143,7 +143,7 @@ public abstract class AbstractRoster implements Roster {
 	addRosterItemChangedHandler(new RosterItemChangedHandler() {
 	    @Override
 	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
-		if (event.wasRemoved()) {
+		if (event.isRemoved()) {
 		    listener.onEvent(event.getItem());
 		}
 	    }

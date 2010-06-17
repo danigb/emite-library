@@ -128,7 +128,7 @@ public class Room extends AbstractChat implements Chat {
 	return addRoomOccupantsChangedHandler(new RoomOccupantsChangedHandler() {
 	    @Override
 	    public void onRoomOccupantsChanged(final RoomOccupantsChangedEvent event) {
-		if (event.wasAdded()) {
+		if (event.isAdded()) {
 		    handler.onRoomOccupantsChanged(event);
 		}
 	    }
@@ -146,7 +146,7 @@ public class Room extends AbstractChat implements Chat {
 	return addRoomOccupantsChangedHandler(new RoomOccupantsChangedHandler() {
 	    @Override
 	    public void onRoomOccupantsChanged(final RoomOccupantsChangedEvent event) {
-		if (event.wasModified()) {
+		if (event.isModified()) {
 		    handler.onRoomOccupantsChanged(event);
 		}
 	    }
@@ -165,7 +165,7 @@ public class Room extends AbstractChat implements Chat {
 	return addRoomOccupantsChangedHandler(new RoomOccupantsChangedHandler() {
 	    @Override
 	    public void onRoomOccupantsChanged(final RoomOccupantsChangedEvent event) {
-		if (event.wasRemoved()) {
+		if (event.isRemoved()) {
 		    handler.onRoomOccupantsChanged(event);
 		}
 	    }

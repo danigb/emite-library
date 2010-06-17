@@ -21,10 +21,10 @@
  */
 package com.calclab.emite.xep.mucchatstate.client;
 
-import com.calclab.emite.im.client.chat.Chat;
+import com.calclab.emite.im.client.chat.ChatChangedEvent;
+import com.calclab.emite.im.client.chat.ChatChangedHandler;
 import com.calclab.emite.xep.muc.client.Room;
 import com.calclab.emite.xep.muc.client.RoomManager;
-import com.calclab.suco.client.events.Listener;
 import com.google.gwt.core.client.GWT;
 
 /**
@@ -40,16 +40,14 @@ public class MUCChatStateManager {
 
     public MUCChatStateManager(final RoomManager chatManager) {
 
-	chatManager.onChatCreated(new Listener<Chat>() {
-	    public void onEvent(final Chat chat) {
-		getRoomOccupantsChatStateManager((Room) chat);
-	    }
-	});
-
-	chatManager.onChatClosed(new Listener<Chat>() {
-	    public void onEvent(final Chat chat) {
-		GWT.log("Removing chat state to chat: " + chat.getID(), null);
-		chat.setData(RoomChatStateManager.class, null);
+	chatManager.addChatChangedHandler(new ChatChangedHandler() {
+	    @Override
+	    public void onChatChanged(final ChatChangedEvent event) {
+		if (event.isCreated()) {
+		    getRoomOccupantsChatStateManager((Room) event.getChat());
+		} else if (event.isClosed()) {
+		    event.getChat().setData(RoomChatStateManager.class, null);
+		}
 	    }
 	});
     }
@@ -65,8 +63,6 @@ public class MUCChatStateManager {
     private RoomChatStateManager createChatState(final Room room) {
 	GWT.log("Adding chat state to chat: " + room.getID(), null);
 	final RoomChatStateManager stateManager = new RoomChatStateManager(room);
-	room.setData(RoomChatStateManager.class, stateManager);
-	room.onBeforeSend(stateManager.doBeforeSend);
 	return stateManager;
     }
 

@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import com.calclab.emite.core.client.events.EmiteEventBus;
+import com.calclab.emite.core.client.events.ChangedEvent.ChangeAction;
 import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
-import com.calclab.emite.im.client.chat.ChatChangedEvent.ChatChange;
 import com.calclab.suco.client.events.Listener;
 import com.google.gwt.event.shared.HandlerRegistration;
 
@@ -31,7 +31,7 @@ public abstract class AbstractChatManager implements ChatManager {
 	return eventBus.addHandler(ChatChangedEvent.getType(), new ChatChangedHandler() {
 	    @Override
 	    public void onChatChanged(final ChatChangedEvent event) {
-		if (event.is(ChatChange.closed)) {
+		if (event.isClosed()) {
 		    handler.onChatChanged(event);
 		}
 	    }
@@ -43,7 +43,7 @@ public abstract class AbstractChatManager implements ChatManager {
 	return eventBus.addHandler(ChatChangedEvent.getType(), new ChatChangedHandler() {
 	    @Override
 	    public void onChatChanged(final ChatChangedEvent event) {
-		if (event.is(ChatChange.created)) {
+		if (event.isCreated()) {
 		    handler.onChatChanged(event);
 		}
 	    }
@@ -56,7 +56,7 @@ public abstract class AbstractChatManager implements ChatManager {
 	    @Override
 	    public void onChatChanged(final ChatChangedEvent event) {
 		{
-		    if (event.is(ChatChange.opened)) {
+		    if (event.isOpened()) {
 			handler.onChatChanged(event);
 		    }
 		}
@@ -80,7 +80,7 @@ public abstract class AbstractChatManager implements ChatManager {
 	addChatChangedHandler(new ChatChangedHandler() {
 	    @Override
 	    public void onChatChanged(final ChatChangedEvent event) {
-		if (event.is(ChatChange.closed)) {
+		if (event.isClosed()) {
 		    listener.onEvent(event.getChat());
 		}
 	    }
@@ -91,7 +91,7 @@ public abstract class AbstractChatManager implements ChatManager {
 	addChatChangedHandler(new ChatChangedHandler() {
 	    @Override
 	    public void onChatChanged(final ChatChangedEvent event) {
-		if (event.is(ChatChange.created)) {
+		if (event.isCreated()) {
 		    listener.onEvent(event.getChat());
 		}
 	    }
@@ -102,7 +102,7 @@ public abstract class AbstractChatManager implements ChatManager {
 	addChatChangedHandler(new ChatChangedHandler() {
 	    @Override
 	    public void onChatChanged(final ChatChangedEvent event) {
-		if (event.is(ChatChange.opened)) {
+		if (event.isOpened()) {
 		    listener.onEvent(event.getChat());
 		}
 	    }
@@ -127,14 +127,14 @@ public abstract class AbstractChatManager implements ChatManager {
     protected abstract Chat createChat(XmppURI uri, XmppURI currentUser);
 
     protected void fireChatClosed(final Chat chat) {
-	eventBus.fireEvent(new ChatChangedEvent(ChatChange.closed, chat));
+	eventBus.fireEvent(new ChatChangedEvent(ChangeAction.CLOSED, chat));
     }
 
     protected void fireChatCreated(final Chat chat) {
-	eventBus.fireEvent(new ChatChangedEvent(ChatChange.created, chat));
+	eventBus.fireEvent(new ChatChangedEvent(ChangeAction.CREATED, chat));
     }
 
     protected void fireChatOpened(final Chat chat) {
-	eventBus.fireEvent(new ChatChangedEvent(ChatChange.opened, chat));
+	eventBus.fireEvent(new ChatChangedEvent(ChangeAction.OPENED, chat));
     }
 }

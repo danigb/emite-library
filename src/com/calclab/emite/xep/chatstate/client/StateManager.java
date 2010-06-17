@@ -25,7 +25,6 @@ import com.calclab.emite.im.client.chat.Chat;
 import com.calclab.emite.im.client.chat.ChatChangedEvent;
 import com.calclab.emite.im.client.chat.ChatChangedHandler;
 import com.calclab.emite.im.client.chat.ChatManager;
-import com.calclab.emite.im.client.chat.ChatChangedEvent.ChatChange;
 import com.calclab.emite.xep.chatstate.client.ChatStateManager.ChatUserState;
 import com.google.gwt.core.client.GWT;
 
@@ -45,9 +44,9 @@ public class StateManager {
 	chatManager.addChatChangedHandler(new ChatChangedHandler() {
 	    @Override
 	    public void onChatChanged(final ChatChangedEvent event) {
-		if (event.is(ChatChange.created)) {
+		if (event.isCreated()) {
 		    getChatState(event.getChat());
-		} else if (event.is(ChatChange.closed)) {
+		} else if (event.isClosed()) {
 		    final Chat chat = event.getChat();
 		    GWT.log("Removing chat state to chat: " + chat.getID());
 		    final ChatStateManager chatStateManager = chat.getData(ChatStateManager.class);

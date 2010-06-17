@@ -11,7 +11,7 @@ public class ChatUserStateChangedEvent extends StateChangedEvent {
 	return TYPE;
     }
 
-    protected ChatUserStateChangedEvent(final String state) {
+    public ChatUserStateChangedEvent(final String state) {
 	super(TYPE, state);
     }
 

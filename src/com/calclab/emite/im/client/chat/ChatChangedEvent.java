@@ -1,12 +1,8 @@
 package com.calclab.emite.im.client.chat;
 
-import com.google.gwt.event.shared.GwtEvent;
+import com.calclab.emite.core.client.events.ChangedEvent;
 
-public class ChatChangedEvent extends GwtEvent<ChatChangedHandler> {
-
-    public static enum ChatChange {
-	opened, closed, created
-    }
+public class ChatChangedEvent extends ChangedEvent<ChatChangedHandler> {
 
     private static final Type<ChatChangedHandler> TYPE = new Type<ChatChangedHandler>();
 
@@ -15,30 +11,15 @@ public class ChatChangedEvent extends GwtEvent<ChatChangedHandler> {
     }
 
     private final Chat chat;
-    private final ChatChange change;
 
-    public ChatChangedEvent(final ChatChange change, final Chat chat) {
-	assert change != null : "ChatChange can't be null in ChatChangedEvent";
+    public ChatChangedEvent(final String changeType, final Chat chat) {
+	super(TYPE, changeType);
 	assert chat != null : "Chat can't be null in ChatChangedEvent";
-	this.change = change;
 	this.chat = chat;
-    }
-
-    @Override
-    public Type<ChatChangedHandler> getAssociatedType() {
-	return TYPE;
-    }
-
-    public ChatChange getChange() {
-	return change;
     }
 
     public Chat getChat() {
 	return chat;
-    }
-
-    public boolean is(final ChatChange change) {
-	return this.change == change;
     }
 
     @Override

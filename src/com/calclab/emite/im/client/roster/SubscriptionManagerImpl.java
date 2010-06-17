@@ -65,7 +65,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 	eventBus.addHandler(RosterItemChangedEvent.getType(), new RosterItemChangedHandler() {
 	    @Override
 	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
-		if (event.wasAdded()) {
+		if (event.isAdded()) {
 		    addItem(event.getItem());
 		}
 	    }

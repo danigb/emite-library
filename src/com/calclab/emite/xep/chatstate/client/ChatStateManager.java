@@ -83,6 +83,9 @@ public class ChatStateManager {
 	 * User has effectively ended their participation in the chat session.
 	 */
 	public static final String gone = "gone";
+
+	public static final String[] all = new String[] { ChatUserState.active, ChatUserState.composing,
+		ChatUserState.pause, ChatUserState.inactive, ChatUserState.gone };
     }
 
     public static enum NegotiationStatus {
@@ -98,9 +101,21 @@ public class ChatStateManager {
 	}
     };
 
+    public static String getStateFromMessage(final Message message) {
+	final IPacket stateChild = message.getFirstChild(CHATSTATES_FILTER);
+	if (stateChild != NoPacket.INSTANCE) {
+	    String state = stateChild.getName();
+	    if (state.startsWith("cha:")) {
+		state = state.substring(4);
+	    }
+	    return state;
+	}
+	return null;
+    }
     private String ownState;
     private String otherState;
     private final Chat chat;
+
     private NegotiationStatus negotiationStatus;
 
     public ChatStateManager(final Chat chat) {
@@ -214,22 +229,15 @@ public class ChatStateManager {
     }
 
     protected void onMessageReceived(final Chat chat, final Message message) {
-	final IPacket stateChild = message.getFirstChild(CHATSTATES_FILTER);
-	if (stateChild != NoPacket.INSTANCE) {
-	    String state = stateChild.getName();
-	    if (state.startsWith("cha:")) {
-		state = state.substring(4);
-	    }
-	    otherState = state;
-	    if (negotiationStatus.equals(NegotiationStatus.notStarted)) {
-		sendStateMessage(ChatUserState.active);
-	    }
-	    if (otherState.equals(ChatUserState.gone)) {
-		negotiationStatus = NegotiationStatus.notStarted;
-	    } else {
-		negotiationStatus = NegotiationStatus.accepted;
-	    }
-	    chat.getChatEventBus().fireEvent(new ChatUserStateChangedEvent(otherState));
+	otherState = getStateFromMessage(message);
+	if (negotiationStatus.equals(NegotiationStatus.notStarted)) {
+	    sendStateMessage(ChatUserState.active);
 	}
+	if (otherState.equals(ChatUserState.gone)) {
+	    negotiationStatus = NegotiationStatus.notStarted;
+	} else {
+	    negotiationStatus = NegotiationStatus.accepted;
+	}
+	chat.getChatEventBus().fireEvent(new ChatUserStateChangedEvent(otherState));
     }
 }
