@@ -24,8 +24,10 @@ package com.calclab.emite.im.client.roster;
 import java.util.Collection;
 import java.util.Set;
 
+import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.suco.client.events.Listener;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * Implements Roster management.
@@ -35,10 +37,48 @@ import com.calclab.suco.client.events.Listener;
 public interface Roster {
 
     /**
+     * Possible (and extensible) roster states
+     */
+    public static class RosterState {
+	public static final String ready = "ready";
+	public static final String notReady = "notReady";
+    }
+
+    /**
      * renamed to requestAddItem
      */
     @Deprecated
     void addItem(XmppURI jid, String name, String... groups);
+
+    /**
+     * Add a handler to know when a roster group has changed (it can be added or
+     * removed)
+     * 
+     * @param handler
+     *            the handler
+     * @return a handler registration to detach the handler
+     */
+    HandlerRegistration addRosterGroupChangedHandler(RosterGroupChangedHandler handler);
+
+    /**
+     * Add a handler to know when a roster item has changed (it can be added to
+     * the roster, removed from the roster or updated any of its attributes)
+     * 
+     * @param handler
+     *            the handler
+     * @return a handler registration to detach the handler
+     */
+    HandlerRegistration addRosterItemChangedHandler(RosterItemChangedHandler handler);
+
+    /**
+     * Add a handler to know when the roster state changed (it can be ready or
+     * notReady)
+     * 
+     * @param handler
+     *            the handler
+     * @return a handler registration to detach the handler
+     */
+    HandlerRegistration addRosterStateChangedHandler(StateChangedHandler handler);
 
     /**
      * Return the group names of this roster (null is one of the group names:
@@ -109,37 +149,47 @@ public interface Roster {
      * Add a listener to know when a roster group is added to the roster after a
      * roster update
      * 
+     * @see addRosterGroupChangedHandler
      * @param listener
      */
+    @Deprecated
     void onGroupAdded(Listener<RosterGroup> listener);
 
     /**
      * Add a listener to know when a roster group is removed from roster after a
      * roster update
      * 
+     * @see addRosterGroupChangedHandler
      * @param listener
      */
+    @Deprecated
     void onGroupRemoved(Listener<RosterGroup> listener);
 
     /**
      * Add a listener if fired when a item is added to the roster
      * 
+     * @see addRosterItemChangedHandler
      * @param listener
      */
+    @Deprecated
     void onItemAdded(Listener<RosterItem> listener);
 
     /**
      * Fired when a item of the roster changed any of its attributes
      * 
+     * @see addRosterItemChangedHandler
      * @param listener
      */
+    @Deprecated
     void onItemChanged(Listener<RosterItem> listener);
 
     /**
      * Add a listener to know when a item is removed from the roster
      * 
+     * @see addRosterItemChangedHandler
      * @param listener
      */
+    @Deprecated
     void onItemRemoved(Listener<RosterItem> listener);
 
     /**
@@ -152,10 +202,12 @@ public interface Roster {
     /**
      * Add a listener to receive the Roster when ready
      * 
+     * @see addRosterChangedHandler
      * @param listener
      *            a listener that receives the roster as collection of
      *            RosterItems
      */
+    @Deprecated
     void onRosterRetrieved(Listener<Collection<RosterItem>> listener);
 
     /**

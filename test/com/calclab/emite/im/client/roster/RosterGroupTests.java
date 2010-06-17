@@ -16,7 +16,8 @@ public class RosterGroupTests {
 
     @Before
     public void setup() {
-	roster = new XmppRoster(new SessionTester());
+	final SessionTester sessionTester = new SessionTester();
+	roster = new XmppRoster(sessionTester.getEventBus(), sessionTester);
     }
 
     @Test

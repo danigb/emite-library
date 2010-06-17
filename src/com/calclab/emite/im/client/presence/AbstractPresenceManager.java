@@ -28,6 +28,7 @@ public abstract class AbstractPresenceManager implements PresenceManager {
 	return ownPresence;
     }
 
+    @Deprecated
     public void onOwnPresenceChanged(final Listener<Presence> listener) {
 	addOwnPresenceChangedHandler(new OwnPresenceChangedHandler() {
 	    @Override

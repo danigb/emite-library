@@ -52,7 +52,7 @@ public class RosterTests {
     @Before
     public void beforeTests() {
 	session = new SessionTester();
-	roster = new XmppRoster(session);
+	roster = new XmppRoster(session.getEventBus(), session);
     }
 
     @Test

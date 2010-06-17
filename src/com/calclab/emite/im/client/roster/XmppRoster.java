@@ -24,6 +24,7 @@ package com.calclab.emite.im.client.roster;
 import java.util.Collection;
 import java.util.List;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.events.IQEvent;
 import com.calclab.emite.core.client.events.IQHandler;
 import com.calclab.emite.core.client.events.PresenceEvent;
@@ -53,7 +54,8 @@ public class XmppRoster extends AbstractRoster implements Roster {
 
     private final XmppSession session;
 
-    public XmppRoster(final XmppSession session) {
+    public XmppRoster(final EmiteEventBus eventBus, final XmppSession session) {
+	super(eventBus);
 	this.session = session;
 
 	session.addStateChangedHandler(new StateChangedHandler() {
@@ -91,8 +93,8 @@ public class XmppRoster extends AbstractRoster implements Roster {
 
 	session.addIncomingIQHandler(new IQHandler() {
 	    @Override
-	    public void onPacket(IQEvent event) {
-		IQ iq = event.getIQ();
+	    public void onPacket(final IQEvent event) {
+		final IQ iq = event.getIQ();
 		if (iq.isType(IQ.Type.set)) {
 		    final IPacket query = iq.getFirstChild(ROSTER_QUERY_FILTER);
 		    if (query != null) {

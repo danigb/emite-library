@@ -7,9 +7,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import com.calclab.emite.core.client.events.DefaultEmiteEventBus;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
-import com.calclab.suco.client.events.Event;
 import com.calclab.suco.client.events.Listener;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * Represents a group in a roster. All the roster itself is a group (with name
@@ -19,10 +20,8 @@ import com.calclab.suco.client.events.Listener;
  */
 public class RosterGroup implements Iterable<RosterItem> {
     private final String name;
-    private final Event<RosterItem> onItemAdded;
-    private final Event<RosterItem> onItemChanged;
-    private final Event<RosterItem> onItemRemoved;
     private final HashMap<XmppURI, RosterItem> itemsByJID;
+    private final DefaultEmiteEventBus eventBus;
 
     /**
      * Creates a new roster group. If name is null, its supposed to be the
@@ -36,10 +35,8 @@ public class RosterGroup implements Iterable<RosterItem> {
     public RosterGroup(final String groupName) {
 	name = groupName;
 	itemsByJID = new HashMap<XmppURI, RosterItem>();
+	eventBus = new DefaultEmiteEventBus();
 
-	onItemAdded = new Event<RosterItem>("rosterGroup.onItemAdded");
-	onItemChanged = new Event<RosterItem>("rosterGroup.onItemChanged");
-	onItemRemoved = new Event<RosterItem>("rosterGroup.onItemRemoved");
     }
 
     /**
@@ -51,7 +48,11 @@ public class RosterGroup implements Iterable<RosterItem> {
      */
     public void add(final RosterItem item) {
 	itemsByJID.put(item.getJID(), item);
-	onItemAdded.fire(item);
+	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_ADDED, item));
+    }
+
+    public HandlerRegistration addRosterItemChangedHandler(final RosterItemChangedHandler handler) {
+	return eventBus.addHandler(RosterItemChangedEvent.getType(), handler);
     }
 
     /**
@@ -120,27 +121,48 @@ public class RosterGroup implements Iterable<RosterItem> {
     }
 
     public void onItemAdded(final Listener<RosterItem> listener) {
-	onItemAdded.add(listener);
+	addRosterItemChangedHandler(new RosterItemChangedHandler() {
+	    @Override
+	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
+		if (event.is(RosterItemChangedEvent.ITEM_ADDED)) {
+		    listener.onEvent(event.getItem());
+		}
+	    }
+	});
     }
 
     public void onItemChanged(final Listener<RosterItem> listener) {
-	onItemChanged.add(listener);
+	addRosterItemChangedHandler(new RosterItemChangedHandler() {
+	    @Override
+	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
+		if (event.is(RosterItemChangedEvent.ITEM_UPDATED)) {
+		    listener.onEvent(event.getItem());
+		}
+	    }
+	});
     }
 
     public void onItemRemoved(final Listener<RosterItem> listener) {
-	onItemRemoved.add(listener);
+	addRosterItemChangedHandler(new RosterItemChangedHandler() {
+	    @Override
+	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
+		if (event.is(RosterItemChangedEvent.ITEM_REMOVED)) {
+		    listener.onEvent(event.getItem());
+		}
+	    }
+	});
     }
 
     public RosterItem remove(final XmppURI jid) {
 	final RosterItem removed = itemsByJID.remove(jid);
 	if (removed != null) {
-	    onItemRemoved.fire(removed);
+	    eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_REMOVED, removed));
 	}
 	return removed;
     }
 
     protected void fireItemChange(final RosterItem item) {
-	onItemChanged.fire(item);
+	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_UPDATED, item));
     }
 
     void clear() {

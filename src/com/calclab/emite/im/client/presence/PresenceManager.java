@@ -33,6 +33,13 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * @see http://xmpp.org/rfcs/rfc3921.html#presence
  */
 public interface PresenceManager {
+    /**
+     * Add a handler to know when the current user's presence changed
+     * 
+     * @param handler
+     *            the handler to be added
+     * @return a handle registration object to detach the handler if needed
+     */
     HandlerRegistration addOwnPresenceChangedHandler(OwnPresenceChangedHandler handler);
 
     /**
@@ -50,7 +57,9 @@ public interface PresenceManager {
     /**
      * Add a litener to the own's-presence-changed event
      * 
+     * @see addOwnPresenceChangedHandler
      * @param listener
      */
+    @Deprecated
     void onOwnPresenceChanged(Listener<Presence> listener);
 }

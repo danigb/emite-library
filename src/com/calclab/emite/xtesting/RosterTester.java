@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.im.client.roster.AbstractRoster;
 import com.calclab.emite.im.client.roster.RosterGroup;
@@ -59,7 +60,8 @@ public class RosterTester extends AbstractRoster {
      * 
      * @see RosterTester.install
      */
-    public RosterTester() {
+    public RosterTester(final EmiteEventBus eventBus) {
+	super(eventBus);
 	added = new ArrayList<ItemAdded>();
 	updated = new ArrayList<ItemUpdated>();
 	removed = new ArrayList<XmppURI>();

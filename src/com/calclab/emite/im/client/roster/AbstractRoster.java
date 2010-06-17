@@ -5,9 +5,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
+import com.calclab.emite.core.client.events.StateChangedEvent;
+import com.calclab.emite.core.client.events.StateChangedHandler;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
-import com.calclab.suco.client.events.Event;
 import com.calclab.suco.client.events.Listener;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * Implements all roster method not related directly with xmpp: boileplate code
@@ -18,27 +21,16 @@ public abstract class AbstractRoster implements Roster {
 
     private final HashMap<String, RosterGroup> groups;
 
-    private final Event<Collection<RosterItem>> onRosterReady;
-    private final Event<RosterItem> onItemAdded;
-    private final Event<RosterItem> onItemChanged;
-    private final Event<RosterItem> onItemRemoved;
-    private final Event<RosterGroup> onGroupRemoved;
-    private final Event<RosterGroup> onGroupAdded;
-
-    private boolean rosterReady;
-
     private final RosterGroup all;
 
-    public AbstractRoster() {
-	rosterReady = false;
-	groups = new HashMap<String, RosterGroup>();
+    private final EmiteEventBus eventBus;
 
-	onItemAdded = new Event<RosterItem>("roster:onItemAdded");
-	onItemChanged = new Event<RosterItem>("roster:onItemChanged");
-	onItemRemoved = new Event<RosterItem>("roster:onItemRemoved");
-	onGroupRemoved = new Event<RosterGroup>("roster.onGroupRemoved");
-	onGroupAdded = new Event<RosterGroup>("roster.onGroupAdded");
-	onRosterReady = new Event<Collection<RosterItem>>("roster:onRosterReady");
+    private String state;
+
+    public AbstractRoster(final EmiteEventBus eventBus) {
+	this.eventBus = eventBus;
+	state = RosterState.notReady;
+	groups = new HashMap<String, RosterGroup>();
 
 	all = new RosterGroup(null);
     }
@@ -46,6 +38,21 @@ public abstract class AbstractRoster implements Roster {
     @Deprecated
     public final void addItem(final XmppURI jid, final String name, final String... groups) {
 	requestAddItem(jid, name, groups);
+    }
+
+    @Override
+    public HandlerRegistration addRosterGroupChangedHandler(final RosterGroupChangedHandler handler) {
+	return eventBus.addHandler(RosterGroupChangedEvent.getType(), handler);
+    }
+
+    @Override
+    public HandlerRegistration addRosterItemChangedHandler(final RosterItemChangedHandler handler) {
+	return eventBus.addHandler(RosterItemChangedEvent.getType(), handler);
+    }
+
+    @Override
+    public HandlerRegistration addRosterStateChangedHandler(final StateChangedHandler handler) {
+	return eventBus.addHandler(RosterStateChangedEvent.getType(), handler);
     }
 
     public Set<String> getGroupNames() {
@@ -82,29 +89,64 @@ public abstract class AbstractRoster implements Roster {
 
     @Override
     public boolean isRosterReady() {
-	return rosterReady;
+	return state.equals(RosterState.ready);
     }
 
     @Override
     public void onGroupAdded(final Listener<RosterGroup> listener) {
-	onGroupAdded.add(listener);
+	addRosterGroupChangedHandler(new RosterGroupChangedHandler() {
+	    @Override
+	    public void onRosterGroupChanged(final RosterGroupChangedEvent event) {
+		if (event.is(RosterGroupChangedEvent.GROUP_ADDED)) {
+		    listener.onEvent(event.getGroup());
+		}
+	    }
+	});
     }
 
     @Override
     public void onGroupRemoved(final Listener<RosterGroup> listener) {
-	onGroupRemoved.add(listener);
+	addRosterGroupChangedHandler(new RosterGroupChangedHandler() {
+	    @Override
+	    public void onRosterGroupChanged(final RosterGroupChangedEvent event) {
+		if (event.is(RosterGroupChangedEvent.GROUP_REMOVED)) {
+		    listener.onEvent(event.getGroup());
+		}
+	    }
+	});
     }
 
     public void onItemAdded(final Listener<RosterItem> listener) {
-	onItemAdded.add(listener);
+	addRosterItemChangedHandler(new RosterItemChangedHandler() {
+	    @Override
+	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
+		if (event.is(RosterItemChangedEvent.ITEM_ADDED)) {
+		    listener.onEvent(event.getItem());
+		}
+	    }
+	});
     }
 
     public void onItemChanged(final Listener<RosterItem> listener) {
-	onItemChanged.add(listener);
+	addRosterItemChangedHandler(new RosterItemChangedHandler() {
+	    @Override
+	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
+		if (event.is(RosterItemChangedEvent.ITEM_UPDATED)) {
+		    listener.onEvent(event.getItem());
+		}
+	    }
+	});
     }
 
     public void onItemRemoved(final Listener<RosterItem> listener) {
-	onItemRemoved.add(listener);
+	addRosterItemChangedHandler(new RosterItemChangedHandler() {
+	    @Override
+	    public void onRosterItemChanged(final RosterItemChangedEvent event) {
+		if (event.is(RosterItemChangedEvent.ITEM_REMOVED)) {
+		    listener.onEvent(event.getItem());
+		}
+	    }
+	});
     }
 
     @Deprecated
@@ -113,7 +155,14 @@ public abstract class AbstractRoster implements Roster {
     }
 
     public void onRosterRetrieved(final Listener<Collection<RosterItem>> listener) {
-	onRosterReady.add(listener);
+	addRosterStateChangedHandler(new StateChangedHandler() {
+	    @Override
+	    public void onStateChanged(final StateChangedEvent event) {
+		if (RosterState.ready == event.getState()) {
+		    listener.onEvent(getItems());
+		}
+	    }
+	});
     }
 
     private void addToGroup(final RosterItem item, final String groupName) {
@@ -137,19 +186,19 @@ public abstract class AbstractRoster implements Roster {
     }
 
     protected void fireGroupAdded(final RosterGroup group) {
-	onGroupAdded.fire(group);
+	eventBus.fireEvent(new RosterGroupChangedEvent(RosterGroupChangedEvent.GROUP_ADDED, group));
     }
 
     protected void fireGroupRemoved(final RosterGroup group) {
-	onGroupRemoved.fire(group);
+	eventBus.fireEvent(new RosterGroupChangedEvent(RosterGroupChangedEvent.GROUP_REMOVED, group));
     }
 
     protected void fireItemAdded(final RosterItem item) {
-	onItemAdded.fire(item);
+	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_ADDED, item));
     }
 
     protected void fireItemChanged(final RosterItem item) {
-	onItemChanged.fire(item);
+	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_UPDATED, item));
 	all.fireItemChange(item);
 	for (final String name : item.getGroups()) {
 	    getRosterGroup(name).fireItemChange(item);
@@ -157,12 +206,12 @@ public abstract class AbstractRoster implements Roster {
     }
 
     protected void fireItemRemoved(final RosterItem item) {
-	onItemRemoved.fire(item);
+	eventBus.fireEvent(new RosterItemChangedEvent(RosterItemChangedEvent.ITEM_REMOVED, item));
     }
 
     protected void fireRosterReady(final Collection<RosterItem> collection) {
-	rosterReady = true;
-	onRosterReady.fire(collection);
+	state = RosterState.ready;
+	eventBus.fireEvent(new RosterStateChangedEvent(state));
     }
 
     protected void removeGroup(final String groupName) {

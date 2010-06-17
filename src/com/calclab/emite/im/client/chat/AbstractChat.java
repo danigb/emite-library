@@ -76,7 +76,7 @@ public abstract class AbstractChat implements Chat {
 
     @Override
     public HandlerRegistration addStateChangedHandler(final StateChangedHandler handler) {
-	return eventBus.addHandler(StateChangedEvent.getType(), handler);
+	return eventBus.addHandler(ChatStateChangedEvent.getType(), handler);
     }
 
     @Override
@@ -167,7 +167,7 @@ public abstract class AbstractChat implements Chat {
     public void setChatState(final String state) {
 	if (this.state != state) {
 	    this.state = state;
-	    eventBus.fireEvent(new StateChangedEvent(state));
+	    eventBus.fireEvent(new ChatStateChangedEvent(state));
 	}
     }
 

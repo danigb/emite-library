@@ -73,7 +73,7 @@ public class InstantMessagingModule extends AbstractModule implements EntryPoint
 	register(SessionComponent.class, new Factory<Roster>(Roster.class) {
 	    @Override
 	    public Roster create() {
-		return new XmppRoster($(XmppSession.class));
+		return new XmppRoster($(EmiteEventBus.class), $(XmppSession.class));
 	    }
 	}, new Factory<ChatManager>(ChatManager.class) {
 	    @Override
@@ -83,7 +83,7 @@ public class InstantMessagingModule extends AbstractModule implements EntryPoint
 	}, new Factory<SubscriptionManager>(SubscriptionManager.class) {
 	    @Override
 	    public SubscriptionManager create() {
-		return new SubscriptionManagerImpl($(XmppSession.class), $(Roster.class));
+		return new SubscriptionManagerImpl($(EmiteEventBus.class), $(XmppSession.class), $(Roster.class));
 	    }
 	}, new Factory<PresenceManager>(PresenceManager.class) {
 	    @Override

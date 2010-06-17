@@ -41,7 +41,7 @@ public class SubscriptionManagerTests {
     public void beforeTests() {
 	session = new SessionTester();
 	roster = mock(Roster.class);
-	manager = new SubscriptionManagerImpl(session, roster);
+	manager = new SubscriptionManagerImpl(session.getEventBus(), session, roster);
 	session.login(uri("user@local"), "anything");
     }
 

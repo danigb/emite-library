@@ -21,6 +21,7 @@
  */
 package com.calclab.emite.im.client.roster;
 
+import com.calclab.emite.core.client.events.EmiteEventBus;
 import com.calclab.emite.core.client.events.PresenceEvent;
 import com.calclab.emite.core.client.events.PresenceHandler;
 import com.calclab.emite.core.client.packet.IPacket;
@@ -30,9 +31,9 @@ import com.calclab.emite.core.client.xmpp.session.XmppSession;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence;
 import com.calclab.emite.core.client.xmpp.stanzas.XmppURI;
 import com.calclab.emite.core.client.xmpp.stanzas.Presence.Type;
-import com.calclab.suco.client.events.Event2;
 import com.calclab.suco.client.events.Listener;
 import com.calclab.suco.client.events.Listener2;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 /**
  * @see SubscriptionManager
@@ -41,13 +42,13 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     protected static final PacketMatcher FILTER_NICK = MatcherFactory.byNameAndXMLNS("nick",
 	    "http://jabber.org/protocol/nick");
     private final XmppSession session;
-    private final Event2<XmppURI, String> onSubscriptionRequested;
     private final Roster roster;
+    private final EmiteEventBus eventBus;
 
-    public SubscriptionManagerImpl(final XmppSession session, final Roster roster) {
+    public SubscriptionManagerImpl(final EmiteEventBus eventBus, final XmppSession session, final Roster roster) {
+	this.eventBus = eventBus;
 	this.session = session;
 	this.roster = roster;
-	onSubscriptionRequested = new Event2<XmppURI, String>("subscriptionManager:onSubscriptionRequested");
 
 	session.addIncomingPresenceHandler(new PresenceHandler() {
 	    @Override
@@ -56,7 +57,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 		{
 		    if (presence.getType() == Type.subscribe) {
 			final IPacket nick = presence.getFirstChild(FILTER_NICK);
-			onSubscriptionRequested.fire(presence.getFrom(), nick.getText());
+			eventBus.fireEvent(new SubscriptionRequestedEvent(presence.getFrom(), nick.getText()));
 		    }
 		}
 	    }
@@ -74,6 +75,10 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 		}
 	    }
 	});
+    }
+
+    public HandlerRegistration addSubscriptionRequestedHandler(final SubscriptionRequestedHandler handler) {
+	return eventBus.addHandler(SubscriptionRequestedEvent.getType(), handler);
     }
 
     public void approveSubscriptionRequest(final XmppURI jid, String nick) {
@@ -94,7 +99,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     public void onSubscriptionRequested(final Listener2<XmppURI, String> listener) {
-	onSubscriptionRequested.add(listener);
+	addSubscriptionRequestedHandler(new SubscriptionRequestedHandler() {
+	    @Override
+	    public void onSubscriptionRequested(final SubscriptionRequestedEvent event) {
+		listener.onEvent(event.getFromUri(), event.getNickName());
+	    }
+	});
     }
 
     public void refuseSubscriptionRequest(final XmppURI jid) {
